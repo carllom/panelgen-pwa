@@ -119,7 +119,9 @@ function render(): void {
 
   // Dial placement preview
   if (store.activeTool === 'dial' && mouseOnCanvas && glyphCache) {
-    const { x, y } = vp.screenToWorld(mouseCanvasX, mouseCanvasY)
+    const w = vp.screenToWorld(mouseCanvasX, mouseCanvasY)
+    const x = store.snapToGrid && store.gridX > 0 ? Math.round(w.x / store.gridX) * store.gridX : w.x
+    const y = store.snapToGrid && store.gridY > 0 ? Math.round(w.y / store.gridY) * store.gridY : w.y
     const preview = makeDefaultDial(x, y, glyphCache)
     const xr = new ExtentsRenderer()
     preview.draw(xr)
@@ -247,6 +249,7 @@ function syncViewport(): void {
   store.zoom = vp.zoom
   store.panX = vp.panX
   store.panY = vp.panY
+  store.viewportInitialized = true
 }
 
 function onPointerEnter(): void {
@@ -313,8 +316,14 @@ async function placeDial(e: PointerEvent): Promise<void> {
   const glyphs = glyphCache ?? await loadFaceGlyphs(FontFace.RomanSimplex)
   const rect = canvasRect()
   const w = vp.screenToWorld(e.clientX - rect.left, e.clientY - rect.top)
-  const x = Math.round(w.x * 1000) / 1000
-  const y = Math.round(w.y * 1000) / 1000
+  let x = Math.round(w.x * 1000) / 1000
+  let y = Math.round(w.y * 1000) / 1000
+  if (store.snapToGrid && store.gridX > 0 && store.gridY > 0) {
+    x = Math.round(x / store.gridX) * store.gridX
+    y = Math.round(y / store.gridY) * store.gridY
+    x = Math.round(x * 1000) / 1000
+    y = Math.round(y * 1000) / 1000
+  }
   const newDial = makeDefaultDial(x, y, glyphs)
   project.stock.items.push(newDial)
   store.selectedItem = newDial
@@ -383,6 +392,14 @@ onMounted(async () => {
 
   loadFaceGlyphs(FontFace.RomanSimplex).then(g => { glyphCache = g })
 
+  // Initialise dimensions synchronously from layout — getBoundingClientRect() is
+  // reliable at onMounted time. ResizeObserver handles subsequent resizes.
+  const initialRect = canvas.getBoundingClientRect()
+  canvas.width      = initialRect.width
+  canvas.height     = initialRect.height
+  vp.canvasWidth    = initialRect.width
+  vp.canvasHeight   = initialRect.height
+
   ro = new ResizeObserver(entries => {
     const { width, height } = entries[0].contentRect
     canvas.width  = width
@@ -394,8 +411,14 @@ onMounted(async () => {
   ro.observe(canvas)
 
   project = await loadProjectFromJson(vcoData)
-  vp.fitToStock(project.stock)
-  syncViewport()
+  if (store.viewportInitialized) {
+    vp.zoom = store.zoom
+    vp.panX = store.panX
+    vp.panY = store.panY
+  } else {
+    vp.fitToStock(project.stock)
+    syncViewport()
+  }
   scheduleRender()
 })
 

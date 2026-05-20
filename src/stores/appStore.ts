@@ -19,11 +19,15 @@ export const useAppStore = defineStore('app', () => {
   // Viewport state — mirrors Viewport class values for reactive reads outside canvas
   // Application settings
   const alwaysDelete = ref(false)
+  const snapToGrid = ref(false)
+  const gridX = ref(5)
+  const gridY = ref(5)
 
   // Viewport state — mirrors Viewport class values for reactive reads outside canvas
+  const viewportInitialized = ref(false)
   const zoom = ref(8)
   const panX = ref(0)
   const panY = ref(0)
 
-  return { selectedItem, activeTool, itemVersion, notifyItemChanged, alwaysDelete, zoom, panX, panY }
+  return { selectedItem, activeTool, itemVersion, notifyItemChanged, alwaysDelete, snapToGrid, gridX, gridY, viewportInitialized, zoom, panX, panY }
 })
