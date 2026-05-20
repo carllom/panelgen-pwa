@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PanelCanvas from './components/PanelCanvas.vue'
 </script>
 
 <template>
@@ -7,7 +8,7 @@
       <h1>PanelGen</h1>
     </header>
     <main>
-      <p>Front panel CAD — porting in progress.</p>
+      <PanelCanvas />
     </main>
   </div>
 </template>
@@ -45,9 +46,6 @@ header h1 {
 
 main {
   flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #666;
+  overflow: hidden;
 }
 </style>
