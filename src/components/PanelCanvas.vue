@@ -13,6 +13,7 @@ import vcoData from '../../examples/vco_compressed.json'
 import { useAppStore } from '../stores/appStore'
 
 const store = useAppStore()
+const emit = defineEmits<{ deleteRequested: [] }>()
 
 const COLOR_POCKET   = '#f0a040'  // amber — milled pockets and drilled holes
 const COLOR_ENGRAVE  = '#4fc3f7'  // blue  — engraved text, dial markings, polylines
@@ -163,7 +164,7 @@ async function loadFile(): Promise<void> {
   scheduleRender()
 }
 
-defineExpose({ loadFile, scheduleRender })
+defineExpose({ loadFile, scheduleRender, deleteSelected })
 
 // ─── Pointer pan / click-select ──────────────────────────────────────────────
 
@@ -249,6 +250,12 @@ function onKeyDown(e: KeyboardEvent): void {
   let dx = 0, dy = 0
   const step = e.ctrlKey ? 0.01 : e.shiftKey ? 1.0 : 0.1
 
+  if (e.key === 'Delete') {
+    e.preventDefault()
+    emit('deleteRequested')
+    return
+  }
+
   switch (e.key) {
     case 'ArrowLeft':  dx = -step; break
     case 'ArrowRight': dx =  step; break
@@ -261,6 +268,15 @@ function onKeyDown(e: KeyboardEvent): void {
   item.pos.x = Math.round((item.pos.x + dx) * 1000) / 1000
   item.pos.y = Math.round((item.pos.y + dy) * 1000) / 1000
   store.notifyItemChanged()
+  scheduleRender()
+}
+
+function deleteSelected(): void {
+  const item = store.selectedItem
+  if (!item || !project?.stock) return
+  const idx = project.stock.items.indexOf(item)
+  if (idx !== -1) project.stock.items.splice(idx, 1)
+  store.selectedItem = null
   scheduleRender()
 }
 
