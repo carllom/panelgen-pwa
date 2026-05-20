@@ -16,12 +16,14 @@ export const useAppStore = defineStore('app', () => {
   const itemVersion = ref(0)
   function notifyItemChanged(): void { itemVersion.value++ }
 
-  // Viewport state — mirrors Viewport class values for reactive reads outside canvas
-  // Application settings
+  // Application settings (persisted)
   const alwaysDelete = ref(false)
   const snapToGrid = ref(false)
   const gridX = ref(5)
   const gridY = ref(5)
+
+  // Transient
+  const pendingLoad = ref(false)
 
   // Viewport state — mirrors Viewport class values for reactive reads outside canvas
   const viewportInitialized = ref(false)
@@ -29,5 +31,9 @@ export const useAppStore = defineStore('app', () => {
   const panX = ref(0)
   const panY = ref(0)
 
-  return { selectedItem, activeTool, itemVersion, notifyItemChanged, alwaysDelete, snapToGrid, gridX, gridY, viewportInitialized, zoom, panX, panY }
+  return { selectedItem, activeTool, itemVersion, notifyItemChanged, alwaysDelete, pendingLoad, snapToGrid, gridX, gridY, viewportInitialized, zoom, panX, panY }
+}, {
+  persist: {
+    pick: ['alwaysDelete', 'snapToGrid', 'gridX', 'gridY'],
+  },
 })

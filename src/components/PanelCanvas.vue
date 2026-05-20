@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { CanvasDraw } from '../renderer/CanvasDraw'
 import { Viewport } from '../renderer/Viewport'
 import { ExtentsRenderer } from '../domain/ExtentsRenderer'
@@ -222,6 +222,12 @@ function deleteSelected(): void {
 
 defineExpose({ loadFile, scheduleRender, deleteSelected })
 
+watch(() => store.pendingLoad, (val) => {
+  if (!val) return
+  store.pendingLoad = false
+  loadFile()
+})
+
 // ─── Pointer events ──────────────────────────────────────────────────────────
 
 let dragging = false
@@ -409,6 +415,12 @@ onMounted(async () => {
     scheduleRender()
   })
   ro.observe(canvas)
+
+  if (store.pendingLoad) {
+    store.pendingLoad = false
+    loadFile()
+    return
+  }
 
   project = await loadProjectFromJson(vcoData)
   if (store.viewportInitialized) {

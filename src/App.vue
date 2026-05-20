@@ -1,11 +1,24 @@
 <script setup lang="ts">
-import { RouterView, RouterLink } from 'vue-router'
+import { RouterView, RouterLink, useRouter } from 'vue-router'
+import { FolderOpen } from 'lucide-vue-next'
+import { useAppStore } from './stores/appStore'
+
+const router = useRouter()
+const store = useAppStore()
+
+async function onLoad(): Promise<void> {
+  await router.push('/')
+  store.pendingLoad = true
+}
 </script>
 
 <template>
   <div class="app">
     <header>
       <span class="app-title">PanelGen</span>
+      <button class="icon-btn" title="Load panel" @click="onLoad">
+        <FolderOpen :size="18" :stroke-width="1.5" />
+      </button>
       <nav class="header-nav">
         <RouterLink to="/" class="nav-link">Editor</RouterLink>
         <RouterLink to="/settings" class="nav-link">Settings</RouterLink>
@@ -37,7 +50,7 @@ body {
 header {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 8px;
   padding: 0 1rem;
   height: 44px;
   background: #16213e;
@@ -49,11 +62,33 @@ header {
   font-size: 1.05rem;
   font-weight: 600;
   color: #4fc3f7;
+  margin-right: 4px;
+}
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: #8899bb;
+  cursor: pointer;
+  transition: color 0.1s, background 0.1s;
+}
+
+.icon-btn:hover {
+  color: #e0e0e0;
+  background: #1a3a5c;
+  border-color: #0f3460;
 }
 
 .header-nav {
   display: flex;
   gap: 4px;
+  margin-left: 8px;
 }
 
 .nav-link {

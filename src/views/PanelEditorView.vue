@@ -49,9 +49,6 @@ const deleteMessage = computed(() => {
 
 <template>
   <div class="editor-view">
-    <div class="editor-toolbar">
-      <button class="toolbar-btn" @click="canvasRef?.loadFile()">Load</button>
-    </div>
     <div class="editor-workspace">
       <ToolSidebar />
       <main>
@@ -80,30 +77,6 @@ const deleteMessage = computed(() => {
   overflow: hidden;
 }
 
-.editor-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  background: #16213e;
-  border-bottom: 1px solid #0f3460;
-  flex-shrink: 0;
-}
-
-.toolbar-btn {
-  padding: 3px 10px;
-  background: #1a3a5c;
-  color: #ccc;
-  border: 1px solid #0f3460;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.82rem;
-}
-
-.toolbar-btn:hover {
-  background: #234d7a;
-  color: #fff;
-}
 
 .editor-workspace {
   flex: 1;
