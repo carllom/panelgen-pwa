@@ -30,7 +30,7 @@ export type GlyphMap = Map<number, Glyph>
 /** Parse a raw Hershey font text file (from archive/PanelGen.Cli/data/hershey) into a GlyphMap. */
 export function parseHersheyData(text: string): GlyphMap {
   const map: GlyphMap = new Map()
-  for (const line of text.split('\n')) {
+  for (const line of text.split(/\r?\n/)) {
     if (!line.trim()) continue
     const charNum = parseInt(line.substring(0, 5), 10)
     const numVert = parseInt(line.substring(5, 8), 10)

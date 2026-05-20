@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
-    "typecheck": "vue-tsc --noEmit"
+    "typecheck": "vue-tsc --noEmit",
+    "split-fonts": "node scripts/split-hershey.mjs"
   },
   "dependencies": {
     "pinia": "^2.3.1",
