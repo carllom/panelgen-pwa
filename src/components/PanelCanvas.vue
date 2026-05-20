@@ -241,10 +241,34 @@ function onWheel(e: WheelEvent): void {
 
 let ro: ResizeObserver | null = null
 
+function onKeyDown(e: KeyboardEvent): void {
+  if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+  const item = store.selectedItem
+  if (!item) return
+
+  let dx = 0, dy = 0
+  const step = e.ctrlKey ? 0.01 : e.shiftKey ? 1.0 : 0.1
+
+  switch (e.key) {
+    case 'ArrowLeft':  dx = -step; break
+    case 'ArrowRight': dx =  step; break
+    case 'ArrowUp':    dy =  step; break  // model y-up → moves up on screen
+    case 'ArrowDown':  dy = -step; break
+    default: return
+  }
+
+  e.preventDefault()
+  item.pos.x = Math.round((item.pos.x + dx) * 1000) / 1000
+  item.pos.y = Math.round((item.pos.y + dy) * 1000) / 1000
+  store.notifyItemChanged()
+  scheduleRender()
+}
+
 onMounted(async () => {
   const canvas = canvasRef.value!
   ctx = canvas.getContext('2d')!
   canvas.addEventListener('wheel', onWheel, { passive: false })
+  window.addEventListener('keydown', onKeyDown)
 
   ro = new ResizeObserver(entries => {
     const { width, height } = entries[0].contentRect
@@ -265,6 +289,7 @@ onMounted(async () => {
 onUnmounted(() => {
   ro?.disconnect()
   canvasRef.value?.removeEventListener('wheel', onWheel)
+  window.removeEventListener('keydown', onKeyDown)
   cancelAnimationFrame(rafId)
 })
 </script>

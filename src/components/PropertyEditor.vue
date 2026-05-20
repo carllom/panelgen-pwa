@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { PanelStockItem } from '../domain/PanelComponent'
+import { useAppStore } from '../stores/appStore'
+
+const store = useAppStore()
 import { CircularPocket } from '../domain/CircularPocket'
 import { RectangularPocket } from '../domain/RectangularPocket'
 import { Dial } from '../domain/Dial'
@@ -36,7 +39,7 @@ function changed(): void { emit('change') }
 <template>
   <aside class="prop-panel">
     <template v-if="item">
-      <div class="prop-header">{{ typeName }}</div>
+      <div class="prop-header">{{ typeName }}<span style="display:none">{{ store.itemVersion }}</span></div>
 
       <!-- Common: position -->
       <div class="prop-group">

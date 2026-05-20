@@ -11,10 +11,15 @@ export const useAppStore = defineStore('app', () => {
   // Active toolbar tool
   const activeTool = ref<ToolType>('select')
 
+  // Incremented whenever selectedItem's properties are mutated externally,
+  // so consumers that bind to item fields can react without deep reactivity.
+  const itemVersion = ref(0)
+  function notifyItemChanged(): void { itemVersion.value++ }
+
   // Viewport state — mirrors Viewport class values for reactive reads outside canvas
   const zoom = ref(8)
   const panX = ref(0)
   const panY = ref(0)
 
-  return { selectedItem, activeTool, zoom, panX, panY }
+  return { selectedItem, activeTool, itemVersion, notifyItemChanged, zoom, panX, panY }
 })
