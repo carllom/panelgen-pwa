@@ -76,7 +76,19 @@ export class Dial extends PanelStockItem {
       drw, this.text,
       xc - fWidth / 2,
       yc - this.innerRadius - this.markerLength - 3,
+      false,
     )
+  }
+
+  drawHole(drw: IDraw): void {
+    if (this.holeRadius <= 0) return
+    const r = this.holeRadius
+    const steps = 36
+    drw.moveTo(this.pos.x + r, this.pos.y)
+    for (let i = 1; i <= steps; i++) {
+      const a = (2 * Math.PI * i) / steps
+      drw.lineTo(this.pos.x + Math.cos(a) * r, this.pos.y + Math.sin(a) * r)
+    }
   }
 
   generateCode(tool: Tool): string {
