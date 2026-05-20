@@ -10,7 +10,6 @@ import { loadProjectFromJson } from '../domain/projectLoader'
 import { loadFaceGlyphs } from '../domain/fontLoader'
 import { FontFace } from '../domain/HersheyFont'
 import type { GlyphMap } from '../domain/HersheyFont'
-import type { PanelGenProject } from '../domain/PanelGenProject'
 import type { PanelStockItem } from '../domain/PanelComponent'
 import vcoData from '../../examples/vco_compressed.json'
 import { useAppStore } from '../stores/appStore'
@@ -30,7 +29,6 @@ const canvasRef = ref<HTMLCanvasElement | null>(null)
 const vp = new Viewport()
 
 let ctx: CanvasRenderingContext2D | null = null
-let project: PanelGenProject | null = null
 let rafId = 0
 let glyphCache: GlyphMap | null = null
 
@@ -66,7 +64,7 @@ function makeDefaultDial(x: number, y: number, glyphs: GlyphMap): Dial {
 
 function render(): void {
   if (!ctx) return
-  const s = project?.stock ?? null
+  const s = store.project?.stock ?? null
   ctx.clearRect(0, 0, vp.canvasWidth, vp.canvasHeight)
   if (!s) return
 
@@ -166,15 +164,6 @@ function render(): void {
   }
 }
 
-// ─── G-code ───────────────────────────────────────────────────────────────────
-
-function openGCodeInTab(): void {
-  if (!project) return
-  const gcode = project.generateGCode()
-  const blob = new Blob([gcode], { type: 'text/plain' })
-  window.open(URL.createObjectURL(blob), '_blank')
-}
-
 // ─── File load ───────────────────────────────────────────────────────────────
 
 async function loadFile(): Promise<void> {
@@ -205,17 +194,17 @@ async function loadFile(): Promise<void> {
     if ((e as DOMException).name === 'AbortError') return
     throw e
   }
-  project = await loadProjectFromJson(JSON.parse(text))
-  vp.fitToStock(project.stock)
+  store.project = await loadProjectFromJson(JSON.parse(text))
+  vp.fitToStock(store.project.stock)
   syncViewport()
   scheduleRender()
 }
 
 function deleteSelected(): void {
   const item = store.selectedItem
-  if (!item || !project?.stock) return
-  const idx = project.stock.items.indexOf(item)
-  if (idx !== -1) project.stock.items.splice(idx, 1)
+  if (!item || !store.project?.stock) return
+  const idx = store.project.stock.items.indexOf(item)
+  if (idx !== -1) store.project.stock.items.splice(idx, 1)
   store.selectedItem = null
   scheduleRender()
 }
@@ -238,7 +227,7 @@ let totalMovement = 0
 function canvasRect(): DOMRect { return canvasRef.value!.getBoundingClientRect() }
 
 function hitTest(wx: number, wy: number): PanelStockItem | null {
-  const items = project?.stock?.items
+  const items = store.project?.stock?.items
   if (!items) return null
   let best: PanelStockItem | null = null
   let bestArea = Infinity
@@ -318,7 +307,7 @@ function onPointerUp(e: PointerEvent): void {
 }
 
 async function placeDial(e: PointerEvent): Promise<void> {
-  if (!project?.stock) return
+  if (!store.project?.stock) return
   const glyphs = glyphCache ?? await loadFaceGlyphs(FontFace.RomanSimplex)
   const rect = canvasRect()
   const w = vp.screenToWorld(e.clientX - rect.left, e.clientY - rect.top)
@@ -331,7 +320,7 @@ async function placeDial(e: PointerEvent): Promise<void> {
     y = Math.round(y * 1000) / 1000
   }
   const newDial = makeDefaultDial(x, y, glyphs)
-  project.stock.items.push(newDial)
+  store.project.stock.items.push(newDial)
   store.selectedItem = newDial
   store.activeTool = 'select'
   store.notifyItemChanged()
@@ -422,13 +411,13 @@ onMounted(async () => {
     return
   }
 
-  project = await loadProjectFromJson(vcoData)
+  store.project = await loadProjectFromJson(vcoData)
   if (store.viewportInitialized) {
     vp.zoom = store.zoom
     vp.panX = store.panX
     vp.panY = store.panY
   } else {
-    vp.fitToStock(project.stock)
+    vp.fitToStock(store.project.stock)
     syncViewport()
   }
   scheduleRender()
@@ -454,7 +443,6 @@ onUnmounted(() => {
       @pointerenter="onPointerEnter"
       @pointerleave="onPointerLeave"
     />
-    <button class="gcode-btn" @click="openGCodeInTab">G-code</button>
   </div>
 </template>
 
@@ -471,19 +459,4 @@ canvas {
   height: 100%;
   touch-action: none;
 }
-
-.gcode-btn {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  padding: 6px 14px;
-  background: #333;
-  color: #eee;
-  border: 1px solid #555;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 13px;
-}
-
-.gcode-btn:hover { background: #444; }
 </style>

@@ -1,10 +1,14 @@
 import { defineStore } from 'pinia'
 import { shallowRef, ref } from 'vue'
 import type { PanelStockItem } from '../domain/PanelComponent'
+import type { PanelGenProject } from '../domain/PanelGenProject'
 
 export type ToolType = 'select' | 'dial' | 'text' | 'polyline' | 'circularPocket' | 'rectPocket'
 
 export const useAppStore = defineStore('app', () => {
+  // Active project
+  const project = shallowRef<PanelGenProject | null>(null)
+
   // Selection
   const selectedItem = shallowRef<PanelStockItem | null>(null)
 
@@ -31,7 +35,7 @@ export const useAppStore = defineStore('app', () => {
   const panX = ref(0)
   const panY = ref(0)
 
-  return { selectedItem, activeTool, itemVersion, notifyItemChanged, alwaysDelete, pendingLoad, snapToGrid, gridX, gridY, viewportInitialized, zoom, panX, panY }
+  return { project, selectedItem, activeTool, itemVersion, notifyItemChanged, alwaysDelete, pendingLoad, snapToGrid, gridX, gridY, viewportInitialized, zoom, panX, panY }
 }, {
   persist: {
     pick: ['alwaysDelete', 'snapToGrid', 'gridX', 'gridY'],
