@@ -6,6 +6,7 @@ import { RectangularPocket } from '../domain/RectangularPocket'
 import { Dial } from '../domain/Dial'
 import { Text } from '../domain/Text'
 import { PolyLine } from '../domain/PolyLine'
+import PointListEditor from './PointListEditor.vue'
 
 const props = defineProps<{ item: PanelStockItem | null }>()
 const emit = defineEmits<{ change: [] }>()
@@ -161,6 +162,17 @@ function changed(): void { emit('change') }
         </div>
       </template>
 
+      <!-- PolyLine -->
+      <template v-if="poly">
+        <div class="prop-group">
+          <div class="prop-row">
+            <label>Points</label>
+            <span class="prop-count">{{ poly.points.length }}</span>
+          </div>
+        </div>
+        <PointListEditor :points="poly.points" @change="changed()" />
+      </template>
+
       <!-- Text -->
       <template v-if="text">
         <div class="prop-group">
@@ -238,6 +250,11 @@ function changed(): void { emit('change') }
 .prop-row input:focus {
   outline: none;
   border-color: #4fc3f7;
+}
+
+.prop-count {
+  color: #556;
+  font-size: 11px;
 }
 
 .prop-empty {

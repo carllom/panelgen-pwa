@@ -10,9 +10,9 @@ import { loadProjectFromJson } from '../domain/projectLoader'
 import type { PanelGenProject } from '../domain/PanelGenProject'
 import type { PanelStockItem } from '../domain/PanelComponent'
 import vcoData from '../../examples/vco_compressed.json'
+import { useAppStore } from '../stores/appStore'
 
-const props = defineProps<{ selectedItem: PanelStockItem | null }>()
-const emit = defineEmits<{ 'update:selectedItem': [item: PanelStockItem | null] }>()
+const store = useAppStore()
 
 const COLOR_POCKET   = '#f0a040'  // amber — milled pockets and drilled holes
 const COLOR_ENGRAVE  = '#4fc3f7'  // blue  — engraved text, dial markings, polylines
@@ -97,7 +97,7 @@ function render(): void {
   ctx.restore()
 
   // Selection highlight — drawn in screen space (always 1px, unaffected by zoom)
-  const sel = props.selectedItem
+  const sel = store.selectedItem
   if (sel) {
     const xr = new ExtentsRenderer()
     sel.draw(xr)
@@ -159,6 +159,7 @@ async function loadFile(): Promise<void> {
   }
   project = await loadProjectFromJson(JSON.parse(text))
   vp.fitToStock(project.stock)
+  syncViewport()
   scheduleRender()
 }
 
@@ -180,7 +181,7 @@ function hitTest(wx: number, wy: number): PanelStockItem | null {
     if (!item.inside(wx, wy)) continue
     const e = item.extents
     const area = e.x * e.y
-    if (area < bestArea) { best = item; bestArea = area }
+    if (area < bestArea) { best = item as PanelStockItem; bestArea = area }
   }
   return best
 }
@@ -194,6 +195,12 @@ function onPointerDown(e: PointerEvent): void {
   ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
 }
 
+function syncViewport(): void {
+  store.zoom = vp.zoom
+  store.panX = vp.panX
+  store.panY = vp.panY
+}
+
 function onPointerMove(e: PointerEvent): void {
   if (!dragging) return
   const dx = e.clientX - lastX
@@ -202,6 +209,7 @@ function onPointerMove(e: PointerEvent): void {
   vp.pan(dx, dy)
   lastX = e.clientX
   lastY = e.clientY
+  syncViewport()
   scheduleRender()
 }
 
@@ -211,7 +219,7 @@ function onPointerUp(e: PointerEvent): void {
   if (totalMovement < 4) {
     const rect = canvasRef.value!.getBoundingClientRect()
     const { x, y } = vp.screenToWorld(e.clientX - rect.left, e.clientY - rect.top)
-    emit('update:selectedItem', hitTest(x, y))
+    store.selectedItem = hitTest(x, y)
     scheduleRender()
   }
 }
@@ -225,6 +233,7 @@ function onWheel(e: WheelEvent): void {
   const cy     = e.clientY - rect.top
   const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15
   vp.zoomAt(factor, cx, cy)
+  syncViewport()
   scheduleRender()
 }
 
@@ -249,6 +258,7 @@ onMounted(async () => {
 
   project = await loadProjectFromJson(vcoData)
   vp.fitToStock(project.stock)
+  syncViewport()
   scheduleRender()
 })
 

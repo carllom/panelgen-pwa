@@ -2,10 +2,11 @@
 import { ref } from 'vue'
 import PanelCanvas from './components/PanelCanvas.vue'
 import PropertyEditor from './components/PropertyEditor.vue'
-import type { PanelStockItem } from './domain/PanelComponent'
+import ToolSidebar from './components/ToolSidebar.vue'
+import { useAppStore } from './stores/appStore'
 
+const store = useAppStore()
 const canvasRef = ref<InstanceType<typeof PanelCanvas> | null>(null)
-const selectedItem = ref<PanelStockItem | null>(null)
 
 function onPropertyChange(): void {
   canvasRef.value?.scheduleRender()
@@ -19,14 +20,11 @@ function onPropertyChange(): void {
       <button class="header-btn" @click="canvasRef?.loadFile()">Load</button>
     </header>
     <div class="workspace">
-      <nav class="tool-sidebar" />
+      <ToolSidebar />
       <main>
-        <PanelCanvas
-          ref="canvasRef"
-          v-model:selectedItem="selectedItem"
-        />
+        <PanelCanvas ref="canvasRef" />
       </main>
-      <PropertyEditor :item="selectedItem" @change="onPropertyChange" />
+      <PropertyEditor :item="store.selectedItem" @change="onPropertyChange" />
     </div>
   </div>
 </template>
@@ -85,13 +83,6 @@ header h1 {
   flex: 1;
   display: flex;
   overflow: hidden;
-}
-
-.tool-sidebar {
-  width: 40px;
-  min-width: 40px;
-  background: #16213e;
-  border-right: 1px solid #0f3460;
 }
 
 main {
