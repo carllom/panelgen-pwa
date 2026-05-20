@@ -1,0 +1,16 @@
+{
+  "name": "PanelGen",
+  "short_name": "PanelGen",
+  "description": "Front panel CAD design software",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#1a1a2e",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
