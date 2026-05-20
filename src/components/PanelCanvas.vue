@@ -7,6 +7,9 @@ import { CircularPocket } from '../domain/CircularPocket'
 import { RectangularPocket } from '../domain/RectangularPocket'
 import { Dial } from '../domain/Dial'
 import { loadProjectFromJson } from '../domain/projectLoader'
+import { loadFaceGlyphs } from '../domain/fontLoader'
+import { FontFace } from '../domain/HersheyFont'
+import type { GlyphMap } from '../domain/HersheyFont'
 import type { PanelGenProject } from '../domain/PanelGenProject'
 import type { PanelStockItem } from '../domain/PanelComponent'
 import vcoData from '../../examples/vco_compressed.json'
@@ -15,9 +18,11 @@ import { useAppStore } from '../stores/appStore'
 const store = useAppStore()
 const emit = defineEmits<{ deleteRequested: [] }>()
 
-const COLOR_POCKET   = '#f0a040'  // amber — milled pockets and drilled holes
-const COLOR_ENGRAVE  = '#4fc3f7'  // blue  — engraved text, dial markings, polylines
-const COLOR_BORDER   = '#555'
+const COLOR_POCKET  = '#f0a040'
+const COLOR_ENGRAVE = '#4fc3f7'
+const COLOR_BORDER  = '#555'
+const COLOR_PREVIEW = 'rgba(79, 195, 247, 0.55)'
+const COLOR_PREVIEW_BOX = 'rgba(79, 195, 247, 0.25)'
 
 // ─── Renderer state ───────────────────────────────────────────────────────────
 
@@ -27,14 +32,37 @@ const vp = new Viewport()
 let ctx: CanvasRenderingContext2D | null = null
 let project: PanelGenProject | null = null
 let rafId = 0
+let glyphCache: GlyphMap | null = null
+
+// Mouse tracking for placement preview
+let mouseCanvasX = 0
+let mouseCanvasY = 0
+let mouseOnCanvas = false
 
 function scheduleRender(): void {
   if (rafId) return
-  rafId = requestAnimationFrame(() => {
-    rafId = 0
-    render()
-  })
+  rafId = requestAnimationFrame(() => { rafId = 0; render() })
 }
+
+// ─── Default dial factory ─────────────────────────────────────────────────────
+
+function makeDefaultDial(x: number, y: number, glyphs: GlyphMap): Dial {
+  const d = new Dial(glyphs)
+  d.pos         = { x, y, z: 0 }
+  d.innerRadius = 8
+  d.arcSpan     = 270
+  d.markerLength = 3
+  d.minValue    = 0
+  d.maxValue    = 10
+  d.step        = 1
+  d.tickLength  = 1.5
+  d.tickCount   = 4
+  d.markerLabelOffset = 1.5
+  d.text        = 'Dial'
+  return d
+}
+
+// ─── Render ───────────────────────────────────────────────────────────────────
 
 function render(): void {
   if (!ctx) return
@@ -60,44 +88,62 @@ function render(): void {
   ctx.lineWidth   = lw
   ctx.stroke()
 
-  // Pass 1 — pockets: CircularPocket, RectangularPocket, and Dial holes
+  // Pass 1 — pockets
   ctx.beginPath()
   for (const item of s.items) {
     if (item instanceof CircularPocket || item instanceof RectangularPocket) {
       const xr = new ExtentsRenderer()
       item.draw(xr)
-      if (xr.minX <= xr.maxX && vp.isVisible(xr.minX, xr.minY, xr.maxX, xr.maxY)) {
-        item.draw(drw)
-      }
+      if (xr.minX <= xr.maxX && vp.isVisible(xr.minX, xr.minY, xr.maxX, xr.maxY)) item.draw(drw)
     } else if (item instanceof Dial && item.holeRadius > 0) {
       const { x, y } = item.pos
       const r = item.holeRadius
-      if (vp.isVisible(x - r, y - r, x + r, y + r)) {
-        item.drawHole(drw)
-      }
+      if (vp.isVisible(x - r, y - r, x + r, y + r)) item.drawHole(drw)
     }
   }
   ctx.strokeStyle = COLOR_POCKET
   ctx.lineWidth   = lw
   ctx.stroke()
 
-  // Pass 2 — engravings: Dial markings, Text, PolyLine
+  // Pass 2 — engravings
   ctx.beginPath()
   for (const item of s.items) {
     if (item instanceof CircularPocket || item instanceof RectangularPocket) continue
     const xr = new ExtentsRenderer()
     item.draw(xr)
-    if (xr.minX <= xr.maxX && vp.isVisible(xr.minX, xr.minY, xr.maxX, xr.maxY)) {
-      item.draw(drw)
-    }
+    if (xr.minX <= xr.maxX && vp.isVisible(xr.minX, xr.minY, xr.maxX, xr.maxY)) item.draw(drw)
   }
   ctx.strokeStyle = COLOR_ENGRAVE
   ctx.lineWidth   = lw
   ctx.stroke()
 
+  // Dial placement preview
+  if (store.activeTool === 'dial' && mouseOnCanvas && glyphCache) {
+    const { x, y } = vp.screenToWorld(mouseCanvasX, mouseCanvasY)
+    const preview = makeDefaultDial(x, y, glyphCache)
+    const xr = new ExtentsRenderer()
+    preview.draw(xr)
+
+    ctx.beginPath()
+    preview.draw(drw)
+    ctx.strokeStyle = COLOR_PREVIEW
+    ctx.lineWidth   = lw
+    ctx.stroke()
+
+    if (xr.minX <= xr.maxX) {
+      const pad = 2 * lw
+      ctx.strokeStyle = COLOR_PREVIEW_BOX
+      ctx.lineWidth   = lw
+      ctx.setLineDash([4 * lw, 2 * lw])
+      ctx.strokeRect(xr.minX - pad, xr.minY - pad,
+        xr.maxX - xr.minX + pad * 2, xr.maxY - xr.minY + pad * 2)
+      ctx.setLineDash([])
+    }
+  }
+
   ctx.restore()
 
-  // Selection highlight — drawn in screen space (always 1px, unaffected by zoom)
+  // Selection highlight — screen space, always 1px
   const sel = store.selectedItem
   if (sel) {
     const xr = new ExtentsRenderer()
@@ -124,8 +170,7 @@ function openGCodeInTab(): void {
   if (!project) return
   const gcode = project.generateGCode()
   const blob = new Blob([gcode], { type: 'text/plain' })
-  const url = URL.createObjectURL(blob)
-  window.open(url, '_blank')
+  window.open(URL.createObjectURL(blob), '_blank')
 }
 
 // ─── File load ───────────────────────────────────────────────────────────────
@@ -164,14 +209,25 @@ async function loadFile(): Promise<void> {
   scheduleRender()
 }
 
+function deleteSelected(): void {
+  const item = store.selectedItem
+  if (!item || !project?.stock) return
+  const idx = project.stock.items.indexOf(item)
+  if (idx !== -1) project.stock.items.splice(idx, 1)
+  store.selectedItem = null
+  scheduleRender()
+}
+
 defineExpose({ loadFile, scheduleRender, deleteSelected })
 
-// ─── Pointer pan / click-select ──────────────────────────────────────────────
+// ─── Pointer events ──────────────────────────────────────────────────────────
 
 let dragging = false
 let lastX = 0
 let lastY = 0
 let totalMovement = 0
+
+function canvasRect(): DOMRect { return canvasRef.value!.getBoundingClientRect() }
 
 function hitTest(wx: number, wy: number): PanelStockItem | null {
   const items = project?.stock?.items
@@ -187,8 +243,24 @@ function hitTest(wx: number, wy: number): PanelStockItem | null {
   return best
 }
 
+function syncViewport(): void {
+  store.zoom = vp.zoom
+  store.panX = vp.panX
+  store.panY = vp.panY
+}
+
+function onPointerEnter(): void {
+  mouseOnCanvas = true
+}
+
+function onPointerLeave(): void {
+  mouseOnCanvas = false
+  if (store.activeTool !== 'select') scheduleRender()
+}
+
 function onPointerDown(e: PointerEvent): void {
   if (e.button !== 0) return
+  if (store.activeTool !== 'select') return  // no pan in placement modes
   dragging = true
   totalMovement = 0
   lastX = e.clientX
@@ -196,13 +268,17 @@ function onPointerDown(e: PointerEvent): void {
   ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
 }
 
-function syncViewport(): void {
-  store.zoom = vp.zoom
-  store.panX = vp.panX
-  store.panY = vp.panY
-}
-
 function onPointerMove(e: PointerEvent): void {
+  // Always track canvas-relative mouse for placement preview
+  const rect = canvasRect()
+  mouseCanvasX = e.clientX - rect.left
+  mouseCanvasY = e.clientY - rect.top
+
+  if (store.activeTool !== 'select') {
+    scheduleRender()
+    return
+  }
+
   if (!dragging) return
   const dx = e.clientX - lastX
   const dy = e.clientY - lastY
@@ -215,40 +291,62 @@ function onPointerMove(e: PointerEvent): void {
 }
 
 function onPointerUp(e: PointerEvent): void {
+  if (e.button !== 0) return
+
+  if (store.activeTool === 'dial') {
+    placeDial(e)
+    return
+  }
+
   if (!dragging) return
   dragging = false
   if (totalMovement < 4) {
-    const rect = canvasRef.value!.getBoundingClientRect()
+    const rect = canvasRect()
     const { x, y } = vp.screenToWorld(e.clientX - rect.left, e.clientY - rect.top)
     store.selectedItem = hitTest(x, y)
     scheduleRender()
   }
 }
 
+async function placeDial(e: PointerEvent): Promise<void> {
+  if (!project?.stock) return
+  const glyphs = glyphCache ?? await loadFaceGlyphs(FontFace.RomanSimplex)
+  const rect = canvasRect()
+  const w = vp.screenToWorld(e.clientX - rect.left, e.clientY - rect.top)
+  const x = Math.round(w.x * 1000) / 1000
+  const y = Math.round(w.y * 1000) / 1000
+  const newDial = makeDefaultDial(x, y, glyphs)
+  project.stock.items.push(newDial)
+  store.selectedItem = newDial
+  store.activeTool = 'select'
+  store.notifyItemChanged()
+  scheduleRender()
+}
+
 // ─── Wheel zoom ──────────────────────────────────────────────────────────────
 
 function onWheel(e: WheelEvent): void {
   e.preventDefault()
-  const rect   = canvasRef.value!.getBoundingClientRect()
-  const cx     = e.clientX - rect.left
-  const cy     = e.clientY - rect.top
+  const rect   = canvasRect()
   const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15
-  vp.zoomAt(factor, cx, cy)
+  vp.zoomAt(factor, e.clientX - rect.left, e.clientY - rect.top)
   syncViewport()
   scheduleRender()
 }
 
-// ─── Lifecycle ───────────────────────────────────────────────────────────────
-
-let ro: ResizeObserver | null = null
+// ─── Keyboard ────────────────────────────────────────────────────────────────
 
 function onKeyDown(e: KeyboardEvent): void {
   if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+
+  if (e.key === 'Escape' && store.activeTool !== 'select') {
+    store.activeTool = 'select'
+    scheduleRender()
+    return
+  }
+
   const item = store.selectedItem
   if (!item) return
-
-  let dx = 0, dy = 0
-  const step = e.ctrlKey ? 0.01 : e.shiftKey ? 1.0 : 0.1
 
   if (e.key === 'Delete') {
     e.preventDefault()
@@ -256,10 +354,12 @@ function onKeyDown(e: KeyboardEvent): void {
     return
   }
 
+  let dx = 0, dy = 0
+  const step = e.ctrlKey ? 0.01 : e.shiftKey ? 1.0 : 0.1
   switch (e.key) {
     case 'ArrowLeft':  dx = -step; break
     case 'ArrowRight': dx =  step; break
-    case 'ArrowUp':    dy =  step; break  // model y-up → moves up on screen
+    case 'ArrowUp':    dy =  step; break
     case 'ArrowDown':  dy = -step; break
     default: return
   }
@@ -271,20 +371,17 @@ function onKeyDown(e: KeyboardEvent): void {
   scheduleRender()
 }
 
-function deleteSelected(): void {
-  const item = store.selectedItem
-  if (!item || !project?.stock) return
-  const idx = project.stock.items.indexOf(item)
-  if (idx !== -1) project.stock.items.splice(idx, 1)
-  store.selectedItem = null
-  scheduleRender()
-}
+// ─── Lifecycle ───────────────────────────────────────────────────────────────
+
+let ro: ResizeObserver | null = null
 
 onMounted(async () => {
   const canvas = canvasRef.value!
   ctx = canvas.getContext('2d')!
   canvas.addEventListener('wheel', onWheel, { passive: false })
   window.addEventListener('keydown', onKeyDown)
+
+  loadFaceGlyphs(FontFace.RomanSimplex).then(g => { glyphCache = g })
 
   ro = new ResizeObserver(entries => {
     const { width, height } = entries[0].contentRect
@@ -294,7 +391,7 @@ onMounted(async () => {
     vp.canvasHeight = height
     scheduleRender()
   })
-  ro.observe(canvas)  // fires synchronously — sets vp.canvasWidth/Height before await below
+  ro.observe(canvas)
 
   project = await loadProjectFromJson(vcoData)
   vp.fitToStock(project.stock)
@@ -314,10 +411,13 @@ onUnmounted(() => {
   <div class="canvas-wrap">
     <canvas
       ref="canvasRef"
+      :style="{ cursor: store.activeTool === 'select' ? 'crosshair' : 'none' }"
       @pointerdown="onPointerDown"
       @pointermove="onPointerMove"
       @pointerup="onPointerUp($event)"
       @pointercancel="dragging = false"
+      @pointerenter="onPointerEnter"
+      @pointerleave="onPointerLeave"
     />
     <button class="gcode-btn" @click="openGCodeInTab">G-code</button>
   </div>
@@ -334,7 +434,6 @@ canvas {
   display: block;
   width: 100%;
   height: 100%;
-  cursor: crosshair;
   touch-action: none;
 }
 
@@ -351,7 +450,5 @@ canvas {
   font-size: 13px;
 }
 
-.gcode-btn:hover {
-  background: #444;
-}
+.gcode-btn:hover { background: #444; }
 </style>
