@@ -13,21 +13,16 @@ const store = useAppStore()
 
       <label class="setting-row">
         <input type="checkbox" v-model="store.alwaysDelete" />
-        <span>Always delete without confirmation</span>
+        <span class="has-tooltip" data-tooltip="Skip the confirmation dialog when deleting elements">Always delete without confirmation</span>
       </label>
 
       <label class="setting-row">
         <input type="checkbox" v-model="store.snapToGrid" />
-        <span>Snap to grid</span>
-      </label>
-
-      <label class="setting-row">
-        <input type="checkbox" v-model="store.showOriginAxes" />
-        <span>Show origin axes</span>
+        <span class="has-tooltip" data-tooltip="Constrain element positions to grid intervals when moving or creating">Snap to grid</span>
       </label>
 
       <div class="setting-row setting-row--indent" :class="{ disabled: !store.snapToGrid }">
-        <span class="setting-label">Grid step</span>
+        <span class="setting-label has-tooltip" data-tooltip="Grid spacing in mm">Grid step</span>
         <label class="grid-input-group">
           <span>X</span>
           <input
@@ -45,36 +40,38 @@ const store = useAppStore()
           />
         </label>
       </div>
+
+      <label class="setting-row">
+        <input type="checkbox" v-model="store.showOriginAxes" />
+        <span class="has-tooltip" data-tooltip="Display X and Y axis lines through the panel origin">Show origin axes</span>
+      </label>
     </section>
 
     <section class="settings-section">
       <h3 class="section-title">Colors</h3>
 
       <div class="setting-row">
-        <span class="setting-label">Pockets</span>
+        <span class="setting-label has-tooltip" data-tooltip="Color used to draw pocket components">Pockets</span>
         <input type="color" v-model="store.colorPocket" />
       </div>
 
       <div class="setting-row">
-        <span class="setting-label">Engraving</span>
+        <span class="setting-label has-tooltip" data-tooltip="Color used to draw engraving components">Engraving</span>
         <input type="color" v-model="store.colorEngrave" />
       </div>
 
       <div class="setting-row">
-        <span class="setting-label">Border</span>
+        <span class="setting-label has-tooltip" data-tooltip="Color used to draw the panel border">Border</span>
         <input type="color" v-model="store.colorBorder" />
       </div>
 
       <div class="setting-row">
-        <span class="setting-label">Preview</span>
+        <span class="setting-label has-tooltip" data-tooltip="Base color of the machining preview overlay">Preview</span>
         <input type="color" v-model="store.colorPreview" />
-        <span class="setting-label" style="min-width:unset">Fill</span>
+        <span class="setting-sublabel has-tooltip" data-tooltip="Opacity of the preview fill">Fill</span>
         <input type="range" min="0" max="1" step="0.01" v-model.number="store.colorPreviewAlpha" class="alpha-slider" />
         <span class="alpha-value">{{ Math.round(store.colorPreviewAlpha * 100) }}%</span>
-      </div>
-
-      <div class="setting-row setting-row--indent">
-        <span class="setting-label">Box outline</span>
+        <span class="setting-sublabel has-tooltip" data-tooltip="Opacity of the preview box outline">Outline</span>
         <input type="range" min="0" max="1" step="0.01" v-model.number="store.colorPreviewBoxAlpha" class="alpha-slider" />
         <span class="alpha-value">{{ Math.round(store.colorPreviewBoxAlpha * 100) }}%</span>
       </div>
@@ -140,6 +137,38 @@ const store = useAppStore()
 .setting-label {
   color: #8899bb;
   min-width: 60px;
+}
+
+.setting-sublabel {
+  color: #8899bb;
+}
+
+.has-tooltip {
+  position: relative;
+  cursor: help;
+}
+
+.has-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1a2a45;
+  border: 1px solid #2a3a55;
+  color: #c0cfe0;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 100;
+}
+
+.has-tooltip:hover::after {
+  opacity: 1;
 }
 
 .grid-input-group {

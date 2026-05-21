@@ -21,6 +21,7 @@ async function onLoad(): Promise<void> {
       </button>
       <nav class="header-nav">
         <RouterLink to="/" class="nav-link">Editor</RouterLink>
+        <RouterLink to="/tools" class="nav-link">Tools</RouterLink>
         <RouterLink to="/settings" class="nav-link">Settings</RouterLink>
         <RouterLink to="/gcode" class="nav-link">Export</RouterLink>
       </nav>

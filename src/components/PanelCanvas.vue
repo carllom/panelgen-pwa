@@ -226,6 +226,8 @@ async function loadFile(): Promise<void> {
     throw e
   }
   store.project = await loadProjectFromJson(JSON.parse(text))
+  if (store.tools.length === 0 && store.project.tools.length > 0)
+    store.tools = store.project.tools.map(t => ({ name: '', feedRate: 800, zFeedRate: 300, rpm: 10000, ...t }))
   vp.fitToStock(store.project.stock)
   syncViewport()
   scheduleRender()
@@ -350,6 +352,8 @@ onMounted(async () => {
 
   if (!store.project) {
     store.project = await loadProjectFromJson(vcoData)
+    if (store.tools.length === 0 && store.project.tools.length > 0)
+      store.tools = store.project.tools.map(t => ({ name: '', feedRate: 800, zFeedRate: 300, rpm: 10000, ...t }))
   }
   if (store.viewportInitialized) {
     vp.zoom = store.zoom

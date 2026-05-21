@@ -11,6 +11,7 @@ import { Dial } from '../domain/Dial'
 import { Text } from '../domain/Text'
 import { PolyLine } from '../domain/PolyLine'
 import PointListEditor from './PointListEditor.vue'
+import ToolSelect from './ToolSelect.vue'
 
 const props = defineProps<{ item: PanelStockItem | null; stock?: PanelStock | null }>()
 const emit = defineEmits<{ change: [] }>()
@@ -56,8 +57,7 @@ function changed(): void { emit('change') }
         </div>
         <div class="prop-row">
           <label>Tool</label>
-          <input type="number" step="1" min="0" :value="item.toolNumber"
-            @input="item.toolNumber = num($event); changed()" />
+          <ToolSelect v-model="item.toolNumber" @update:model-value="changed()" />
         </div>
       </div>
 
@@ -160,8 +160,7 @@ function changed(): void { emit('change') }
           </div>
           <div class="prop-row">
             <label>Hole tool</label>
-            <input type="number" step="1" min="0" :value="dial.holeToolNumber"
-              @input="dial.holeToolNumber = num($event); changed()" />
+            <ToolSelect v-model="dial.holeToolNumber" @update:model-value="changed()" />
           </div>
         </div>
       </template>

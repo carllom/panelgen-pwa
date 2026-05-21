@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { shallowRef, ref, computed } from 'vue'
 import type { PanelStockItem } from '../domain/PanelComponent'
 import type { PanelGenProject } from '../domain/PanelGenProject'
+import type { Tool } from '../domain/Tool'
 import { hexToRgba } from '../utils/color'
 
 export type ToolType = 'select' | 'nodeEdit' | 'dial' | 'text' | 'polyline' | 'circularPocket' | 'rectPocket'
@@ -28,6 +29,9 @@ export const useAppStore = defineStore('app', () => {
   const gridY          = ref(5)
   const showOriginAxes = ref(false)
 
+  // Global CNC tool library (persisted)
+  const tools = ref<Tool[]>([])
+
   // Canvas colors (persisted)
   const colorPocket          = ref('#f0a040')
   const colorEngrave         = ref('#4fc3f7')
@@ -50,6 +54,7 @@ export const useAppStore = defineStore('app', () => {
 
   return {
     project, selectedItem, activeTool, itemVersion, notifyItemChanged,
+    tools,
     alwaysDelete, pendingLoad, snapToGrid, gridX, gridY,
     colorPocket, colorEngrave, colorBorder,
     colorPreview, colorPreviewAlpha, colorPreviewBoxAlpha,
@@ -60,6 +65,7 @@ export const useAppStore = defineStore('app', () => {
 }, {
   persist: {
     pick: [
+      'tools',
       'alwaysDelete', 'snapToGrid', 'gridX', 'gridY',
       'colorPocket', 'colorEngrave', 'colorBorder',
       'colorPreview', 'colorPreviewAlpha', 'colorPreviewBoxAlpha',

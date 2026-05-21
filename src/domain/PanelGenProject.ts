@@ -5,9 +5,9 @@ export class PanelGenProject {
   stock = new PanelStock()
   tools: Tool[] = []
 
-  generateGCode(): string {
+  generateGCode(tools?: Tool[]): string {
     const lines: string[] = []
-    for (const tool of this.tools) {
+    for (const tool of (tools ?? this.tools)) {
       // Matches C# Generate() + GenerateToolPath() structure (duplicate T/M06 is intentional).
       lines.push(`T${tool.number + 1}`, 'M06')
       lines.push(`T${tool.number + 1}`, 'M06')

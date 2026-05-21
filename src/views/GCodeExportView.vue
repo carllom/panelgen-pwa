@@ -5,7 +5,7 @@ const store = useAppStore()
 
 function exportGCode(): void {
   if (!store.project) return
-  const gcode = store.project.generateGCode()
+  const gcode = store.project.generateGCode(store.tools.length ? store.tools : undefined)
   const blob = new Blob([gcode], { type: 'text/plain' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
