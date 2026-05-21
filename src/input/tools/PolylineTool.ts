@@ -35,6 +35,7 @@ export class PolylineTool implements ToolHandler {
     const { x, y } = ctx.canvasCoords(e)
     const w = ctx.vp.screenToWorld(x, y)
     this.mouseW = e.ctrlKey ? w : applySnap(w.x, w.y, ctx)
+    this.onCanvas = true
     ctx.scheduleRender()
   }
 

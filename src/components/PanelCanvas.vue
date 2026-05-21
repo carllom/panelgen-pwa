@@ -6,6 +6,7 @@ import { ExtentsRenderer } from '../domain/ExtentsRenderer'
 import { CircularPocket } from '../domain/CircularPocket'
 import { RectangularPocket } from '../domain/RectangularPocket'
 import { Dial } from '../domain/Dial'
+import { PolyLine } from '../domain/PolyLine'
 import { PanelGenProject } from '../domain/PanelGenProject'
 import { PanelStock } from '../domain/PanelStock'
 import { loadProjectFromJson } from '../domain/projectLoader'
@@ -265,6 +266,13 @@ function deleteSelected(): void {
 
 defineExpose({ loadFile, scheduleRender, deleteSelected })
 
+watch(() => store.activeTool, (_newTool, oldTool) => {
+  toolHandlers[oldTool]?.onPointerLeave?.(toolCtx)
+  if (mouseOnCanvas && lastMouseEvent) {
+    activeTool().onPointerMove(lastMouseEvent, toolCtx)
+  }
+})
+
 watch(() => store.pendingLoad, (val) => {
   if (!val) return
   store.pendingLoad = false
@@ -291,10 +299,25 @@ watch(() => store.pendingNew, (val) => {
 
 // ─── Pointer events ───────────────────────────────────────────────────────────
 
-function onPointerEnter(): void              { activeTool().onPointerEnter?.(toolCtx) }
-function onPointerLeave(): void              { activeTool().onPointerLeave?.(toolCtx) }
+let mouseOnCanvas   = false
+let lastMouseEvent: PointerEvent | null = null
+
+function onPointerEnter(e: PointerEvent): void {
+  mouseOnCanvas = true
+  lastMouseEvent = e
+  activeTool().onPointerEnter?.(toolCtx)
+}
+function onPointerLeave(): void {
+  mouseOnCanvas  = false
+  lastMouseEvent = null
+  activeTool().onPointerLeave?.(toolCtx)
+}
 function onPointerDown(e: PointerEvent): void  { activeTool().onPointerDown(e, toolCtx) }
-function onPointerMove(e: PointerEvent): void  { activeTool().onPointerMove(e, toolCtx) }
+function onPointerMove(e: PointerEvent): void  {
+  mouseOnCanvas  = true
+  lastMouseEvent = e
+  activeTool().onPointerMove(e, toolCtx)
+}
 function onPointerUp(e: PointerEvent): void    { activeTool().onPointerUp(e, toolCtx) }
 function onPointerCancel(e: PointerEvent): void { activeTool().onPointerCancel?.(e, toolCtx) }
 
@@ -325,8 +348,18 @@ const notSel   = () => store.activeTool !== 'select'
 const stepX    = () => store.snapToGrid && store.gridX > 0 ? store.gridX : 1.0
 const stepY    = () => store.snapToGrid && store.gridY > 0 ? store.gridY : 1.0
 
+const setTool = (t: ToolType) => () => { store.activeTool = t; scheduleRender() }
+
 const keyBindings: KeyBinding[] = [
   { key: 'Escape', guard: notSel, action: () => { store.activeTool = 'select'; scheduleRender() } },
+  { key: 'Enter',  guard: () => store.activeTool === 'select' && store.selectedItem instanceof PolyLine, action: setTool('nodeEdit') },
+  { key: 'v', action: setTool('select')         },
+  { key: 'a', action: setTool('nodeEdit')        },
+  { key: 'p', action: setTool('polyline')        },
+  { key: 't', action: setTool('text')            },
+  { key: 'r', action: setTool('rectPocket')      },
+  { key: 'c', action: setTool('circularPocket')  },
+  { key: 'd', action: setTool('dial')            },
   { key: 'Delete', guard: hasSel, action: () => emit('deleteRequested') },
   // Arrow nudge — ctrl: fine (0.01 mm), shift: coarse (1.0 mm), plain: normal (0.1 mm)
   { key: 'ArrowLeft',  ctrl: true,                guard: hasSel, action: () => moveItem(-0.01,  0)    },

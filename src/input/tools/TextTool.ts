@@ -25,6 +25,7 @@ export class TextTool implements ToolHandler {
     const { x, y } = ctx.canvasCoords(e)
     this.mouseX = x
     this.mouseY = y
+    this.onCanvas = true
     ctx.scheduleRender()
   }
 
