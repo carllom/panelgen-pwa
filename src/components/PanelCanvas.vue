@@ -109,6 +109,21 @@ function render(): void {
   const lw  = 1 / vp.zoom
   const drw = new CanvasDraw(ctx)
 
+  // Origin axes
+  if (store.showOriginAxes) {
+    const tl = vp.screenToWorld(0, 0)
+    const br = vp.screenToWorld(vp.canvasWidth, vp.canvasHeight)
+    ctx.lineWidth = lw
+    ctx.beginPath()
+    ctx.moveTo(tl.x, 0); ctx.lineTo(br.x, 0)
+    ctx.strokeStyle = '#f44336'  // X axis — red
+    ctx.stroke()
+    ctx.beginPath()
+    ctx.moveTo(0, tl.y); ctx.lineTo(0, br.y)
+    ctx.strokeStyle = '#4caf50'  // Y axis — green
+    ctx.stroke()
+  }
+
   // Panel stock outline
   ctx.beginPath()
   const { width, height, pos } = s

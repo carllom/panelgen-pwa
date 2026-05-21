@@ -22,10 +22,11 @@ export const useAppStore = defineStore('app', () => {
   function notifyItemChanged(): void { itemVersion.value++ }
 
   // Application settings (persisted)
-  const alwaysDelete = ref(false)
-  const snapToGrid = ref(false)
-  const gridX = ref(5)
-  const gridY = ref(5)
+  const alwaysDelete   = ref(false)
+  const snapToGrid     = ref(false)
+  const gridX          = ref(5)
+  const gridY          = ref(5)
+  const showOriginAxes = ref(false)
 
   // Canvas colors (persisted)
   const colorPocket          = ref('#f0a040')
@@ -53,6 +54,7 @@ export const useAppStore = defineStore('app', () => {
     colorPocket, colorEngrave, colorBorder,
     colorPreview, colorPreviewAlpha, colorPreviewBoxAlpha,
     colorPreviewRgba, colorPreviewBoxRgba,
+    showOriginAxes,
     viewportInitialized, zoom, panX, panY,
   }
 }, {
@@ -61,6 +63,7 @@ export const useAppStore = defineStore('app', () => {
       'alwaysDelete', 'snapToGrid', 'gridX', 'gridY',
       'colorPocket', 'colorEngrave', 'colorBorder',
       'colorPreview', 'colorPreviewAlpha', 'colorPreviewBoxAlpha',
+      'showOriginAxes',
     ],
   },
 })

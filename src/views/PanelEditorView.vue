@@ -12,6 +12,12 @@ import { Text } from '../domain/Text'
 import { PolyLine } from '../domain/PolyLine'
 
 const store = useAppStore()
+
+const stockForEditor = computed(() =>
+  !store.selectedItem && store.activeTool === 'select'
+    ? store.project?.stock ?? null
+    : null
+)
 const canvasRef = ref<InstanceType<typeof PanelCanvas> | null>(null)
 const showDeleteConfirm = ref(false)
 
@@ -57,7 +63,7 @@ const deleteMessage = computed(() => {
           @deleteRequested="onDeleteRequested"
         />
       </main>
-      <PropertyEditor :item="store.selectedItem" @change="onPropertyChange" />
+      <PropertyEditor :item="store.selectedItem" :stock="stockForEditor" @change="onPropertyChange" />
     </div>
   </div>
 

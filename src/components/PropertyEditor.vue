@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { PanelStockItem } from '../domain/PanelComponent'
+import { PanelStock } from '../domain/PanelStock'
 import { useAppStore } from '../stores/appStore'
 
 const store = useAppStore()
@@ -11,7 +12,7 @@ import { Text } from '../domain/Text'
 import { PolyLine } from '../domain/PolyLine'
 import PointListEditor from './PointListEditor.vue'
 
-const props = defineProps<{ item: PanelStockItem | null }>()
+const props = defineProps<{ item: PanelStockItem | null; stock?: PanelStock | null }>()
 const emit = defineEmits<{ change: [] }>()
 
 const pocket  = computed(() => props.item instanceof CircularPocket    ? props.item : null)
@@ -193,6 +194,41 @@ function changed(): void { emit('change') }
       </template>
 
     </template>
+
+    <!-- Panel stock (shown when no item is selected and select tool is active) -->
+    <template v-else-if="stock">
+      <div class="prop-header">Panel Stock</div>
+      <div class="prop-group">
+        <div class="prop-row">
+          <label>Width</label>
+          <input type="number" step="0.5" min="1" :value="stock.width"
+            @input="stock.width = num($event); changed()" />
+        </div>
+        <div class="prop-row">
+          <label>Height</label>
+          <input type="number" step="0.5" min="1" :value="stock.height"
+            @input="stock.height = num($event); changed()" />
+        </div>
+        <div class="prop-row">
+          <label>Thickness</label>
+          <input type="number" step="0.1" min="0.1" :value="stock.thickness"
+            @input="stock.thickness = num($event); changed()" />
+        </div>
+      </div>
+      <div class="prop-group">
+        <div class="prop-row">
+          <label>Center X</label>
+          <input type="number" step="0.1" :value="stock.pos.x"
+            @input="stock.pos.x = num($event); changed()" />
+        </div>
+        <div class="prop-row">
+          <label>Center Y</label>
+          <input type="number" step="0.1" :value="stock.pos.y"
+            @input="stock.pos.y = num($event); changed()" />
+        </div>
+      </div>
+    </template>
+
     <div v-else class="prop-empty">No selection</div>
   </aside>
 </template>

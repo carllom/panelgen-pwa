@@ -21,6 +21,11 @@ const store = useAppStore()
         <span>Snap to grid</span>
       </label>
 
+      <label class="setting-row">
+        <input type="checkbox" v-model="store.showOriginAxes" />
+        <span>Show origin axes</span>
+      </label>
+
       <div class="setting-row setting-row--indent" :class="{ disabled: !store.snapToGrid }">
         <span class="setting-label">Grid step</span>
         <label class="grid-input-group">
