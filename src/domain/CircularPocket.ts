@@ -37,6 +37,19 @@ export class CircularPocket extends PanelStockItem {
     }
   }
 
+  drawSteps(drw: IDraw): void {
+    for (const step of this.steps) {
+      if (step.diameter === this.diameter) continue
+      const r = step.diameter / 2
+      const segs = 36
+      drw.moveTo(this.pos.x + r, this.pos.y)
+      for (let i = 1; i <= segs; i++) {
+        const a = (2 * Math.PI * i) / segs
+        drw.lineTo(this.pos.x + Math.cos(a) * r, this.pos.y + Math.sin(a) * r)
+      }
+    }
+  }
+
   clone(): CircularPocket {
     const copy = new CircularPocket()
     copy.pos = { ...this.pos }

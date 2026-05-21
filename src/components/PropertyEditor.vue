@@ -12,6 +12,7 @@ import { Text } from '../domain/Text'
 import { PolyLine } from '../domain/PolyLine'
 import PointListEditor from './PointListEditor.vue'
 import ToolSelect from './ToolSelect.vue'
+import CircularStepsEditor from './CircularStepsEditor.vue'
 
 const props = defineProps<{ item: PanelStockItem | null; stock?: PanelStock | null }>()
 const emit = defineEmits<{ change: [] }>()
@@ -75,6 +76,7 @@ function changed(): void { emit('change') }
               @input="pocket.depth = num($event); changed()" />
           </div>
         </div>
+        <CircularStepsEditor :steps="pocket.steps" @change="changed()" />
       </template>
 
       <!-- RectangularPocket -->

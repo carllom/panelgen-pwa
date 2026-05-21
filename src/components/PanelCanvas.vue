@@ -157,6 +157,21 @@ function render(): void {
   ctx.lineWidth   = lw
   ctx.stroke()
 
+  // Pass 1b — inner step circles of stepped pockets (dimmed)
+  ctx.beginPath()
+  for (const item of s.items) {
+    if (!(item instanceof CircularPocket) || item.steps.length === 0) continue
+    const xr = new ExtentsRenderer()
+    item.draw(xr)
+    if (xr.minX <= xr.maxX && vp.isVisible(xr.minX, xr.minY, xr.maxX, xr.maxY))
+      item.drawSteps(drw)
+  }
+  ctx.globalAlpha = 0.4
+  ctx.strokeStyle = store.colorPocket
+  ctx.lineWidth   = lw
+  ctx.stroke()
+  ctx.globalAlpha = 1
+
   // Pass 2 — engravings
   ctx.beginPath()
   for (const item of s.items) {
