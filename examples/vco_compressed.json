@@ -1,0 +1,793 @@
+﻿
+{
+  "version": "1.0",
+  "stock": {
+    "pos": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "width": 76.2,
+    "height": 133.35,
+    "thickness": 3,
+    "items": [
+      {
+        "type": "Dial",
+        "pos": {
+          "x": 20,
+          "y": 85,
+          "z": 0
+        },
+        "toolNumber": 0,
+        "holeToolNumber": 1,
+        "holeRadius": 3.5,
+        "holeDepth": 3,
+        "innerRadius": 7.5,
+        "arcSpan": 300,
+        "markerLength": 2.5,
+        "minValue": 0,
+        "maxValue": 10,
+        "step": 1,
+        "tickLength": 1.2,
+        "tickCount": 1,
+        "text": "lin. fm level",
+        "markerLabelOffset": 1.5,
+        "markerFontSize": 1.5,
+        "labelFontSize": 2
+      },
+      {
+        "type": "Dial",
+        "pos": {
+          "x": 56.2,
+          "y": 85,
+          "z": 0
+        },
+        "toolNumber": 0,
+        "holeToolNumber": 1,
+        "holeRadius": 3.5,
+        "holeDepth": 3,
+        "innerRadius": 7.5,
+        "arcSpan": 300,
+        "markerLength": 2.5,
+        "minValue": 0,
+        "maxValue": 10,
+        "step": 1,
+        "tickLength": 1.2,
+        "tickCount": 1,
+        "text": "exp. fm level",
+        "markerLabelOffset": 1.5,
+        "markerFontSize": 1.5,
+        "labelFontSize": 2
+      },
+      {
+        "type": "Dial",
+        "pos": {
+          "x": 20,
+          "y": 56.5,
+          "z": 0
+        },
+        "toolNumber": 0,
+        "holeToolNumber": 1,
+        "holeRadius": 3.5,
+        "holeDepth": 3,
+        "innerRadius": 7.5,
+        "arcSpan": 300,
+        "markerLength": 2.5,
+        "minValue": -5,
+        "maxValue": 5,
+        "step": 1,
+        "tickLength": 1.2,
+        "tickCount": 1,
+        "text": "pulse width",
+        "markerLabelOffset": 1.5,
+        "markerFontSize": 1.5,
+        "labelFontSize": 2
+      },
+      {
+        "type": "Dial",
+        "pos": {
+          "x": 56.2,
+          "y": 56.5,
+          "z": 0
+        },
+        "toolNumber": 0,
+        "holeToolNumber": 1,
+        "holeRadius": 3.5,
+        "holeDepth": 3,
+        "innerRadius": 7.5,
+        "arcSpan": 300,
+        "markerLength": 2.5,
+        "minValue": 0,
+        "maxValue": 10,
+        "step": 1,
+        "tickLength": 1.2,
+        "tickCount": 1,
+        "text": "pwm",
+        "markerLabelOffset": 1.5,
+        "markerFontSize": 1.5,
+        "labelFontSize": 2
+      },
+      {
+        "type": "CircularPocket",
+        "pos": {
+          "x": 15,
+          "y": 17,
+          "z": 0
+        },
+        "toolNumber": 1,
+        "diameter": 8.1,
+        "depth": 3,
+        "steps": [
+          {
+            "diameter": 8.1,
+            "depth": 1
+          },
+          {
+            "diameter": 6,
+            "depth": 2
+          }
+        ]
+      },
+      {
+        "type": "Text",
+        "pos": {
+          "x": 15,
+          "y": 10.5,
+          "z": 0
+        },
+        "toolNumber": 0,
+        "text": "1V/oct",
+        "fontSize": 2,
+        "anchor": "Center"
+      },
+      {
+        "type": "PolyLine",
+        "pos": {
+          "x": 42.7,
+          "y": 7,
+          "z": 0
+        },
+        "toolNumber": 2,
+        "radius": 0,
+        "points": [
+          {
+            "x": 2.5,
+            "y": 31
+          },
+          {
+            "x": 0,
+            "y": 31
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 25,
+            "y": 0
+          },
+          {
+            "x": 25,
+            "y": 31
+          },
+          {
+            "x": 22.5,
+            "y": 31
+          }
+        ]
+      },
+      {
+        "type": "Dial",
+        "pos": {
+          "x": 20,
+          "y": 113.5,
+          "z": 0
+        },
+        "toolNumber": 0,
+        "holeToolNumber": 1,
+        "holeRadius": 3.5,
+        "holeDepth": 3,
+        "innerRadius": 7.5,
+        "arcSpan": 300,
+        "markerLength": 2.5,
+        "minValue": 0,
+        "maxValue": 10,
+        "step": 1,
+        "tickLength": 1.2,
+        "tickCount": 1,
+        "text": "frequency",
+        "markerLabelOffset": 1.5,
+        "markerFontSize": 1.5,
+        "labelFontSize": 2
+      },
+      {
+        "type": "Dial",
+        "pos": {
+          "x": 56.2,
+          "y": 113.5,
+          "z": 0
+        },
+        "toolNumber": 0,
+        "holeToolNumber": 1,
+        "holeRadius": 3.5,
+        "holeDepth": 3,
+        "innerRadius": 7.5,
+        "arcSpan": 300,
+        "markerLength": 2.5,
+        "minValue": -5,
+        "maxValue": 5,
+        "step": 1,
+        "tickLength": 1.2,
+        "tickCount": 3,
+        "text": "fine tune",
+        "markerLabelOffset": 2,
+        "markerFontSize": 1.5,
+        "labelFontSize": 2
+      },
+      {
+        "type": "Text",
+        "pos": {
+          "x": 38.1,
+          "y": 128,
+          "z": 0
+        },
+        "toolNumber": 3,
+        "text": "VCO",
+        "fontSize": 5,
+        "anchor": "Center"
+      },
+      {
+        "type": "Text",
+        "pos": {
+          "x": 55.2,
+          "y": 38,
+          "z": 0
+        },
+        "toolNumber": 2,
+        "text": "waveform",
+        "fontSize": 2.5,
+        "anchor": "Center"
+      },
+      {
+        "type": "Text",
+        "pos": {
+          "x": 49,
+          "y": 10.5,
+          "z": 0
+        },
+        "toolNumber": 0,
+        "text": "saw",
+        "fontSize": 2,
+        "anchor": "Center"
+      },
+      {
+        "type": "Text",
+        "pos": {
+          "x": 61.4,
+          "y": 10.5,
+          "z": 0
+        },
+        "toolNumber": 0,
+        "text": "pulse",
+        "fontSize": 2,
+        "anchor": "Center"
+      },
+      {
+        "type": "Text",
+        "pos": {
+          "x": 49,
+          "y": 24.5,
+          "z": 0
+        },
+        "toolNumber": 0,
+        "text": "sin",
+        "fontSize": 2,
+        "anchor": "Center"
+      },
+      {
+        "type": "Text",
+        "pos": {
+          "x": 61.4,
+          "y": 24.5,
+          "z": 0
+        },
+        "toolNumber": 0,
+        "text": "tri",
+        "fontSize": 2,
+        "anchor": "Center"
+      },
+      {
+        "type": "PolyLine",
+        "pos": {
+          "x": 9,
+          "y": 7,
+          "z": 0
+        },
+        "toolNumber": 2,
+        "radius": 0,
+        "points": [
+          {
+            "x": 2.5,
+            "y": 31
+          },
+          {
+            "x": 0,
+            "y": 31
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 12.5,
+            "y": 0
+          },
+          {
+            "x": 12.5,
+            "y": 31
+          },
+          {
+            "x": 10,
+            "y": 31
+          }
+        ]
+      },
+      {
+        "type": "CircularPocket",
+        "pos": {
+          "x": 49,
+          "y": 17,
+          "z": 0
+        },
+        "toolNumber": 1,
+        "diameter": 8.1,
+        "depth": 3,
+        "steps": [
+          {
+            "diameter": 8.1,
+            "depth": 1
+          },
+          {
+            "diameter": 6,
+            "depth": 2
+          }
+        ]
+      },
+      {
+        "type": "CircularPocket",
+        "pos": {
+          "x": 61.4,
+          "y": 17,
+          "z": 0
+        },
+        "toolNumber": 1,
+        "diameter": 8.1,
+        "depth": 3,
+        "steps": [
+          {
+            "diameter": 8.1,
+            "depth": 1
+          },
+          {
+            "diameter": 6,
+            "depth": 2
+          }
+        ]
+      },
+      {
+        "type": "CircularPocket",
+        "pos": {
+          "x": 49,
+          "y": 31,
+          "z": 0
+        },
+        "toolNumber": 1,
+        "diameter": 8.1,
+        "depth": 3,
+        "steps": [
+          {
+            "diameter": 8.1,
+            "depth": 1
+          },
+          {
+            "diameter": 6,
+            "depth": 2
+          }
+        ]
+      },
+      {
+        "type": "CircularPocket",
+        "pos": {
+          "x": 61.4,
+          "y": 31,
+          "z": 0
+        },
+        "toolNumber": 1,
+        "diameter": 8.1,
+        "depth": 3,
+        "steps": [
+          {
+            "diameter": 8.1,
+            "depth": 1
+          },
+          {
+            "diameter": 6,
+            "depth": 2
+          }
+        ]
+      },
+      {
+        "type": "Text",
+        "pos": {
+          "x": 15,
+          "y": 38,
+          "z": 0
+        },
+        "toolNumber": 2,
+        "text": "in",
+        "fontSize": 2.5,
+        "anchor": "Center"
+      },
+      {
+        "type": "PolyLine",
+        "pos": {
+          "x": 25.7,
+          "y": 7,
+          "z": 0
+        },
+        "toolNumber": 2,
+        "radius": 0,
+        "points": [
+          {
+            "x": 2.5,
+            "y": 31
+          },
+          {
+            "x": 0,
+            "y": 31
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 12.5,
+            "y": 0
+          },
+          {
+            "x": 12.5,
+            "y": 31
+          },
+          {
+            "x": 10,
+            "y": 31
+          }
+        ]
+      },
+      {
+        "type": "Text",
+        "pos": {
+          "x": 31.5,
+          "y": 38,
+          "z": 0
+        },
+        "toolNumber": 2,
+        "text": "fm",
+        "fontSize": 2,
+        "anchor": "Center"
+      },
+      {
+        "type": "CircularPocket",
+        "pos": {
+          "x": 31.7,
+          "y": 17,
+          "z": 0
+        },
+        "toolNumber": 1,
+        "diameter": 8.1,
+        "depth": 3,
+        "steps": [
+          {
+            "diameter": 8.1,
+            "depth": 1
+          },
+          {
+            "diameter": 6,
+            "depth": 2
+          }
+        ]
+      },
+      {
+        "type": "Text",
+        "pos": {
+          "x": 31.7,
+          "y": 10.5,
+          "z": 0
+        },
+        "toolNumber": 0,
+        "text": "linear",
+        "fontSize": 2,
+        "anchor": "Center"
+      },
+      {
+        "type": "CircularPocket",
+        "pos": {
+          "x": 31.7,
+          "y": 31,
+          "z": 0
+        },
+        "toolNumber": 1,
+        "diameter": 8.1,
+        "depth": 3,
+        "steps": [
+          {
+            "diameter": 8.1,
+            "depth": 1
+          },
+          {
+            "diameter": 6,
+            "depth": 2
+          }
+        ]
+      },
+      {
+        "type": "Text",
+        "pos": {
+          "x": 31.7,
+          "y": 24.5,
+          "z": 0
+        },
+        "toolNumber": 0,
+        "text": "exp",
+        "fontSize": 2,
+        "anchor": "Center"
+      },
+      {
+        "type": "CircularPocket",
+        "pos": {
+          "x": 15,
+          "y": 31,
+          "z": 0
+        },
+        "toolNumber": 1,
+        "diameter": 8.1,
+        "depth": 3,
+        "steps": [
+          {
+            "diameter": 8.1,
+            "depth": 1
+          },
+          {
+            "diameter": 6,
+            "depth": 2
+          }
+        ]
+      },
+      {
+        "type": "Text",
+        "pos": {
+          "x": 15,
+          "y": 24.5,
+          "z": 0
+        },
+        "toolNumber": 0,
+        "text": "1V/oct",
+        "fontSize": 2,
+        "anchor": "Center"
+      },
+      {
+        "type": "CircularPocket",
+        "pos": {
+          "x": 38.1,
+          "y": 71,
+          "z": 0
+        },
+        "toolNumber": 1,
+        "diameter": 8.1,
+        "depth": 3,
+        "steps": [
+          {
+            "diameter": 8.1,
+            "depth": 1
+          },
+          {
+            "diameter": 6,
+            "depth": 2
+          }
+        ]
+      },
+      {
+        "type": "Text",
+        "pos": {
+          "x": 38.1,
+          "y": 92.5,
+          "z": 0
+        },
+        "toolNumber": 0,
+        "text": "sync",
+        "fontSize": 2,
+        "anchor": "Center"
+      },
+      {
+        "type": "CircularPocket",
+        "pos": {
+          "x": 38.1,
+          "y": 99,
+          "z": 0
+        },
+        "toolNumber": 1,
+        "diameter": 8.1,
+        "depth": 3,
+        "steps": [
+          {
+            "diameter": 8.1,
+            "depth": 1
+          },
+          {
+            "diameter": 6,
+            "depth": 2
+          }
+        ]
+      },
+      {
+        "type": "PolyLine",
+        "pos": {
+          "x": 38.1,
+          "y": 67.5,
+          "z": 0
+        },
+        "toolNumber": 2,
+        "radius": 0,
+        "points": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": -24
+          },
+          {
+            "x": 13,
+            "y": -24
+          },
+          {
+            "x": -8,
+            "y": -24
+          }
+        ]
+      },
+      {
+        "type": "CircularPocket",
+        "pos": {
+          "x": 5.425,
+          "y": 5.425,
+          "z": 0
+        },
+        "toolNumber": 3,
+        "diameter": 3,
+        "depth": 3,
+        "steps": [
+        ]
+      },
+      {
+        "type": "CircularPocket",
+        "pos": {
+          "x": 5.425,
+          "y": 127.925,
+          "z": 0
+        },
+        "toolNumber": 3,
+        "diameter": 3,
+        "depth": 3,
+        "steps": [
+        ]
+      },
+      {
+        "type": "CircularPocket",
+        "pos": {
+          "x": 70.775,
+          "y": 127.925,
+          "z": 0
+        },
+        "toolNumber": 3,
+        "diameter": 3,
+        "depth": 3,
+        "steps": [
+        ]
+      },
+      {
+        "type": "CircularPocket",
+        "pos": {
+          "x": 70.775,
+          "y": 5.425,
+          "z": 0
+        },
+        "toolNumber": 3,
+        "diameter": 3,
+        "depth": 3,
+        "steps": [
+        ]
+      },
+      {
+        "type": "CircularPocket",
+        "pos": {
+          "x": 5.425,
+          "y": 5.425,
+          "z": 0
+        },
+        "toolNumber": 4,
+        "diameter": 6,
+        "depth": 1.5,
+        "steps": [
+        ]
+      },
+      {
+        "type": "CircularPocket",
+        "pos": {
+          "x": 70.775,
+          "y": 5.425,
+          "z": 0
+        },
+        "toolNumber": 4,
+        "diameter": 6,
+        "depth": 1.5,
+        "steps": [
+        ]
+      },
+      {
+        "type": "CircularPocket",
+        "pos": {
+          "x": 5.425,
+          "y": 127.925,
+          "z": 0
+        },
+        "toolNumber": 4,
+        "diameter": 6,
+        "depth": 1.5,
+        "steps": [
+        ]
+      },
+      {
+        "type": "CircularPocket",
+        "pos": {
+          "x": 70.775,
+          "y": 127.925,
+          "z": 0
+        },
+        "toolNumber": 4,
+        "diameter": 6,
+        "depth": 1.5,
+        "steps": [
+        ]
+      }
+    ]
+  },
+  "tools": [
+    {
+      "number": 0,
+      "diameter": 0.1,
+      "zStep": 0.3
+    },
+    {
+      "number": 1,
+      "diameter": 3.175,
+      "zStep": 0.256
+    },
+    {
+      "number": 2,
+      "diameter": 0.5,
+      "zStep": 0.2
+    },
+    {
+      "number": 3,
+      "diameter": 1,
+      "zStep": 0.2
+    },
+    {
+      "number": 4,
+      "diameter": 3,
+      "zStep": 0.2
+    }
+  ]
+}
