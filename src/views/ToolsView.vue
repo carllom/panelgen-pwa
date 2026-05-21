@@ -52,7 +52,7 @@ function num(e: Event): number {
             :class="{ 'tool-item--active': selectedIndex === i }"
             @click="selectTool(i)"
           >
-            <span class="tool-number">T{{ tool.number }}</span>
+            <span class="tool-number">T{{ tool.number + 1 }}</span>
             <span class="tool-name">{{ tool.name || '(unnamed)' }}</span>
             <span class="tool-diam">∅{{ tool.diameter }}mm</span>
           </button>

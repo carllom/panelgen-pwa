@@ -13,9 +13,9 @@ const store = useAppStore()
     :value="modelValue"
     @change="$emit('update:modelValue', +($event.target as HTMLSelectElement).value)"
   >
-    <option v-if="store.tools.length === 0" :value="modelValue">T{{ modelValue }}</option>
+    <option v-if="store.tools.length === 0" :value="modelValue">T{{ modelValue + 1 }}</option>
     <option v-for="t in store.tools" :key="t.number" :value="t.number">
-      {{ t.name ? `T${t.number} – ${t.name}` : `T${t.number} (∅${t.diameter}mm)` }}
+      {{ t.name ? `T${t.number + 1} – ${t.name}` : `T${t.number + 1} (∅${t.diameter}mm)` }}
     </option>
   </select>
 </template>

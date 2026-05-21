@@ -1,25 +1,40 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useAppStore } from '../stores/appStore'
 
 const store = useAppStore()
+const exportByLayer = ref(false)
 
-function exportGCode(): void {
-  if (!store.project) return
-  const gcode = store.project.generateGCode(store.tools.length ? store.tools : undefined)
-  const blob = new Blob([gcode], { type: 'text/plain' })
+function downloadText(filename: string, text: string): void {
+  const blob = new Blob([text], { type: 'text/plain' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = 'panel.nc'
+  a.download = filename
   a.click()
   URL.revokeObjectURL(url)
+}
+
+function exportGCode(): void {
+  if (!store.project) return
+  const tools = store.tools.length ? store.tools : undefined
+  if (exportByLayer.value) {
+    const layers = store.project.generateGCodeByLayer(tools)
+    for (const { tool, code } of layers)
+      downloadText(`panel_T${tool.number + 1}.nc`, code)
+  } else {
+    downloadText('panel.nc', store.project.generateGCode(tools))
+  }
 }
 </script>
 
 <template>
   <div class="gcode-view">
     <h2>G-code Export</h2>
-    <p class="hint">Options will appear here in a future update.</p>
+    <label class="option-row">
+      <input type="checkbox" v-model="exportByLayer" />
+      Export by layer (one file per tool)
+    </label>
     <button
       class="export-btn"
       :disabled="!store.project"
@@ -45,9 +60,14 @@ h2 {
   color: #4fc3f7;
 }
 
-.hint {
-  color: #8899bb;
-  font-size: 0.85rem;
+.option-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #c0d0e8;
+  font-size: 0.9rem;
+  cursor: pointer;
+  user-select: none;
 }
 
 .export-btn {
