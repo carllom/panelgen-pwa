@@ -6,6 +6,8 @@ import { ExtentsRenderer } from '../domain/ExtentsRenderer'
 import { CircularPocket } from '../domain/CircularPocket'
 import { RectangularPocket } from '../domain/RectangularPocket'
 import { Dial } from '../domain/Dial'
+import { PanelGenProject } from '../domain/PanelGenProject'
+import { PanelStock } from '../domain/PanelStock'
 import { loadProjectFromJson } from '../domain/projectLoader'
 import { loadFaceGlyphs } from '../domain/fontLoader'
 import { FontFace } from '../domain/HersheyFont'
@@ -246,7 +248,7 @@ async function loadFile(): Promise<void> {
   }
   store.project = await loadProjectFromJson(JSON.parse(text))
   if (store.tools.length === 0 && store.project.tools.length > 0)
-    store.tools = store.project.tools.map(t => ({ name: '', feedRate: 800, zFeedRate: 300, rpm: 10000, ...t }))
+    store.tools = store.project.tools.map(t => ({ ...t }))
   vp.fitToStock(store.project.stock)
   syncViewport()
   scheduleRender()
@@ -267,6 +269,24 @@ watch(() => store.pendingLoad, (val) => {
   if (!val) return
   store.pendingLoad = false
   loadFile()
+})
+
+watch(() => store.pendingNew, (val) => {
+  if (!val) return
+  store.pendingNew = false
+  const p = new PanelGenProject()
+  p.stock = new PanelStock()
+  p.stock.width     = store.defaultPanelWidth
+  p.stock.height    = store.defaultPanelHeight
+  p.stock.thickness = store.defaultPanelThickness
+  p.stock.pos       = { x: store.defaultPanelWidth / 2, y: store.defaultPanelHeight / 2, z: 0 }
+  store.project      = p
+  store.selectedItem = null
+  store.fileHandle   = null
+  store.saveFileName = 'panel.json'
+  vp.fitToStock(p.stock)
+  syncViewport()
+  scheduleRender()
 })
 
 // ─── Pointer events ───────────────────────────────────────────────────────────
@@ -372,7 +392,7 @@ onMounted(async () => {
   if (!store.project) {
     store.project = await loadProjectFromJson(vcoData)
     if (store.tools.length === 0 && store.project.tools.length > 0)
-      store.tools = store.project.tools.map(t => ({ name: '', feedRate: 800, zFeedRate: 300, rpm: 10000, ...t }))
+      store.tools = store.project.tools.map(t => ({ ...t }))
   }
   if (store.viewportInitialized) {
     vp.zoom = store.zoom

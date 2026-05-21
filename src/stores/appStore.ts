@@ -29,6 +29,11 @@ export const useAppStore = defineStore('app', () => {
   const gridY          = ref(5)
   const showOriginAxes = ref(false)
 
+  // New-panel defaults (persisted)
+  const defaultPanelWidth     = ref(100)
+  const defaultPanelHeight    = ref(150)
+  const defaultPanelThickness = ref(3)
+
   // Global CNC tool library (persisted)
   const tools = ref<Tool[]>([])
 
@@ -45,6 +50,7 @@ export const useAppStore = defineStore('app', () => {
 
   // Transient
   const pendingLoad = ref(false)
+  const pendingNew  = ref(false)
   const saveFileName = ref('panel.json')
   const fileHandle = ref<FileSystemFileHandle | null>(null)
 
@@ -57,7 +63,8 @@ export const useAppStore = defineStore('app', () => {
   return {
     project, selectedItem, activeTool, itemVersion, notifyItemChanged,
     tools,
-    alwaysDelete, pendingLoad, saveFileName, fileHandle, snapToGrid, gridX, gridY,
+    alwaysDelete, pendingLoad, pendingNew, saveFileName, fileHandle, snapToGrid, gridX, gridY,
+    defaultPanelWidth, defaultPanelHeight, defaultPanelThickness,
     colorPocket, colorEngrave, colorBorder,
     colorPreview, colorPreviewAlpha, colorPreviewBoxAlpha,
     colorPreviewRgba, colorPreviewBoxRgba,
@@ -69,6 +76,7 @@ export const useAppStore = defineStore('app', () => {
     pick: [
       'tools',
       'alwaysDelete', 'snapToGrid', 'gridX', 'gridY',
+      'defaultPanelWidth', 'defaultPanelHeight', 'defaultPanelThickness',
       'colorPocket', 'colorEngrave', 'colorBorder',
       'colorPreview', 'colorPreviewAlpha', 'colorPreviewBoxAlpha',
       'showOriginAxes',

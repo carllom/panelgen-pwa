@@ -48,6 +48,32 @@ const store = useAppStore()
     </section>
 
     <section class="settings-section">
+      <h3 class="section-title">New Panel Defaults</h3>
+
+      <div class="setting-row setting-row--indent">
+        <span class="setting-label has-tooltip" data-tooltip="Default panel width in mm">Width</span>
+        <label class="grid-input-group">
+          <input type="number" step="0.5" min="1" v-model.number="store.defaultPanelWidth" />
+          <span>mm</span>
+        </label>
+      </div>
+      <div class="setting-row setting-row--indent">
+        <span class="setting-label has-tooltip" data-tooltip="Default panel height in mm">Height</span>
+        <label class="grid-input-group">
+          <input type="number" step="0.5" min="1" v-model.number="store.defaultPanelHeight" />
+          <span>mm</span>
+        </label>
+      </div>
+      <div class="setting-row setting-row--indent">
+        <span class="setting-label has-tooltip" data-tooltip="Default panel material thickness in mm">Thickness</span>
+        <label class="grid-input-group">
+          <input type="number" step="0.1" min="0.1" v-model.number="store.defaultPanelThickness" />
+          <span>mm</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="settings-section">
       <h3 class="section-title">Colors</h3>
 
       <div class="setting-row">

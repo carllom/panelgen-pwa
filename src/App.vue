@@ -1,11 +1,27 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { RouterView, RouterLink, useRouter } from 'vue-router'
-import { FolderOpen, Save } from '@lucide/vue'
+import { FilePlus, FolderOpen, Save } from '@lucide/vue'
 import { useAppStore } from './stores/appStore'
 import { saveProjectToJson } from './domain/projectSaver'
+import ToastNotification from './components/ToastNotification.vue'
 
 const router = useRouter()
 const store = useAppStore()
+
+const toastMessage = ref('')
+let toastTimer = 0
+
+function showToast(msg: string): void {
+  toastMessage.value = msg
+  clearTimeout(toastTimer)
+  toastTimer = window.setTimeout(() => { toastMessage.value = '' }, 2500)
+}
+
+async function onNewProject(): Promise<void> {
+  await router.push('/')
+  store.pendingNew = true
+}
 
 async function onLoad(): Promise<void> {
   await router.push('/')
@@ -21,6 +37,7 @@ async function onSave(): Promise<void> {
       const writable = await store.fileHandle.createWritable()
       await writable.write(json)
       await writable.close()
+      showToast(`Saved — ${store.saveFileName}`)
       return
     }
 
@@ -36,6 +53,7 @@ async function onSave(): Promise<void> {
       await writable.close()
       store.fileHandle = handle
       store.saveFileName = handle.name
+      showToast(`Saved — ${handle.name}`)
       return
     }
   } catch (e) {
@@ -51,6 +69,7 @@ async function onSave(): Promise<void> {
   a.download = store.saveFileName
   a.click()
   URL.revokeObjectURL(url)
+  showToast(`Downloaded — ${store.saveFileName}`)
 }
 </script>
 
@@ -58,6 +77,9 @@ async function onSave(): Promise<void> {
   <div class="app">
     <header>
       <span class="app-title">PanelGen</span>
+      <button class="icon-btn" title="New project" @click="onNewProject">
+        <FilePlus :size="18" :stroke-width="1.5" />
+      </button>
       <button class="icon-btn" title="Load panel" @click="onLoad">
         <FolderOpen :size="18" :stroke-width="1.5" />
       </button>
@@ -72,6 +94,7 @@ async function onSave(): Promise<void> {
       </nav>
     </header>
     <RouterView class="router-view" />
+    <ToastNotification :message="toastMessage" />
   </div>
 </template>
 
