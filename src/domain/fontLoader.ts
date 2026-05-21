@@ -18,13 +18,13 @@ import type { GlyphMap } from './HersheyFont'
 type HersheyRange = 1 | 2 | 3 | 4
 
 const RANGE_URLS: Record<HersheyRange, string> = {
-  1: '/data/hershey-1',
-  2: '/data/hershey-2',
-  3: '/data/hershey-3',
-  4: '/data/hershey-4',
+  1: `${import.meta.env.BASE_URL}data/hershey-1`,
+  2: `${import.meta.env.BASE_URL}data/hershey-2`,
+  3: `${import.meta.env.BASE_URL}data/hershey-3`,
+  4: `${import.meta.env.BASE_URL}data/hershey-4`,
 }
 
-const JP_URL = '/data/hershey-jp'
+const JP_URL = `${import.meta.env.BASE_URL}data/hershey-jp`
 
 // Ranges required per face, derived from the ASCII-map cross-range analysis.
 // All faces need range 1; most also need range 3 for shared punctuation.
