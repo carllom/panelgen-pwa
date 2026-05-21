@@ -12,8 +12,11 @@
     "typecheck": "vue-tsc --noEmit",
     "split-fonts": "node scripts/split-hershey.mjs"
   },
+  "overrides": {
+    "glob": "^13.0.0"
+  },
   "dependencies": {
-    "lucide-vue-next": "^1.0.0",
+    "@lucide/vue": "^1.16.0",
     "pinia": "^2.3.1",
     "pinia-plugin-persistedstate": "^4.7.1",
     "vue": "^3.5.13",

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { RouterView, RouterLink, useRouter } from 'vue-router'
-import { FolderOpen } from 'lucide-vue-next'
+import { FolderOpen } from '@lucide/vue'
 import { useAppStore } from './stores/appStore'
 
 const router = useRouter()

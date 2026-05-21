@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { MousePointer2, Waypoints, Gauge, Type, Spline, Cylinder, Box } from 'lucide-vue-next'
+import { MousePointer2, Waypoints, Gauge, Type, Spline, Cylinder, Box } from '@lucide/vue'
 import { useAppStore } from '../stores/appStore'
 import type { ToolType } from '../stores/appStore'
 
