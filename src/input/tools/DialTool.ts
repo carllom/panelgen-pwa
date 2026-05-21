@@ -92,6 +92,7 @@ export class DialTool implements ToolHandler {
     const w = ctx.vp.screenToWorld(x, y)
     const snapped = applySnap(w.x, w.y, ctx)
     const newDial = makeDefaultDial(snapped.x, snapped.y, glyphs)
+    ctx.pushHistory()
     ctx.store.project.stock.items.push(newDial)
     ctx.store.selectedItem = newDial
     ctx.store.activeTool   = 'select'

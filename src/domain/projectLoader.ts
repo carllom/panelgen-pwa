@@ -48,6 +48,19 @@ interface JProject {
 
 // ─── Public API ───────────────────────────────────────────────────────────────
 
+export function loadStockFromRaw(js: { pos: JPos; width: number; height: number; thickness: number; items: JItemBase[] }, glyphs: GlyphMap): PanelStock {
+  const stock = new PanelStock()
+  stock.pos = { x: js.width / 2, y: js.height / 2, z: js.pos.z }
+  stock.width = js.width
+  stock.height = js.height
+  stock.thickness = js.thickness
+  for (const rawItem of js.items) {
+    const item = buildItem(rawItem, glyphs)
+    if (item) stock.items.push(item)
+  }
+  return stock
+}
+
 /**
  * Parse a PanelGen JSON project (v1.0) into a PanelGenProject ready for
  * rendering and G-code generation.

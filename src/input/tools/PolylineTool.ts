@@ -112,6 +112,7 @@ export class PolylineTool implements ToolHandler {
       ctx.scheduleRender()
       return
     }
+    ctx.pushHistory()
     ctx.store.project.stock.items.push(pl)
     ctx.store.selectedItem = pl
     ctx.store.activeTool = 'select'

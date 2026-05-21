@@ -15,7 +15,7 @@ import ToolSelect from './ToolSelect.vue'
 import CircularStepsEditor from './CircularStepsEditor.vue'
 
 const props = defineProps<{ item: PanelStockItem | null; stock?: PanelStock | null }>()
-const emit = defineEmits<{ change: [] }>()
+const emit = defineEmits<{ change: []; beforeChange: [] }>()
 
 const pocket  = computed(() => props.item instanceof CircularPocket    ? props.item : null)
 const rect    = computed(() => props.item instanceof RectangularPocket ? props.item : null)
@@ -49,12 +49,12 @@ function changed(): void { emit('change') }
         <div class="prop-row">
           <label>X</label>
           <input type="number" step="0.1" :value="item.pos.x"
-            @input="item.pos.x = num($event); changed()" />
+            @focus="emit('beforeChange')" @input="item.pos.x = num($event); changed()" />
         </div>
         <div class="prop-row">
           <label>Y</label>
           <input type="number" step="0.1" :value="item.pos.y"
-            @input="item.pos.y = num($event); changed()" />
+            @focus="emit('beforeChange')" @input="item.pos.y = num($event); changed()" />
         </div>
         <div class="prop-row">
           <label>Tool</label>
@@ -68,12 +68,12 @@ function changed(): void { emit('change') }
           <div class="prop-row">
             <label>Diameter</label>
             <input type="number" step="0.1" min="0" :value="pocket.diameter"
-              @input="pocket.diameter = num($event); changed()" />
+              @focus="emit('beforeChange')" @input="pocket.diameter = num($event); changed()" />
           </div>
           <div class="prop-row">
             <label>Depth</label>
             <input type="number" step="0.1" min="0" :value="pocket.depth"
-              @input="pocket.depth = num($event); changed()" />
+              @focus="emit('beforeChange')" @input="pocket.depth = num($event); changed()" />
           </div>
         </div>
         <CircularStepsEditor :steps="pocket.steps" @change="changed()" />
@@ -85,17 +85,17 @@ function changed(): void { emit('change') }
           <div class="prop-row">
             <label>Width</label>
             <input type="number" step="0.1" min="0" :value="rect.width"
-              @input="rect.width = num($event); changed()" />
+              @focus="emit('beforeChange')" @input="rect.width = num($event); changed()" />
           </div>
           <div class="prop-row">
             <label>Height</label>
             <input type="number" step="0.1" min="0" :value="rect.height"
-              @input="rect.height = num($event); changed()" />
+              @focus="emit('beforeChange')" @input="rect.height = num($event); changed()" />
           </div>
           <div class="prop-row">
             <label>Depth</label>
             <input type="number" step="0.1" min="0" :value="rect.depth"
-              @input="rect.depth = num($event); changed()" />
+              @focus="emit('beforeChange')" @input="rect.depth = num($event); changed()" />
           </div>
         </div>
       </template>
@@ -106,59 +106,59 @@ function changed(): void { emit('change') }
           <div class="prop-row">
             <label>Label</label>
             <input type="text" :value="dial.text"
-              @input="dial.text = ($event.target as HTMLInputElement).value; changed()" />
+              @focus="emit('beforeChange')" @input="dial.text = ($event.target as HTMLInputElement).value; changed()" />
           </div>
           <div class="prop-row">
             <label>Inner R</label>
             <input type="number" step="0.1" min="0" :value="dial.innerRadius"
-              @input="dial.innerRadius = num($event); changed()" />
+              @focus="emit('beforeChange')" @input="dial.innerRadius = num($event); changed()" />
           </div>
           <div class="prop-row">
             <label>Arc span</label>
             <input type="number" step="1" min="0" max="360" :value="dial.arcSpan"
-              @input="dial.arcSpan = num($event); changed()" />
+              @focus="emit('beforeChange')" @input="dial.arcSpan = num($event); changed()" />
           </div>
           <div class="prop-row">
             <label>Min</label>
             <input type="number" step="1" :value="dial.minValue"
-              @input="dial.minValue = num($event); changed()" />
+              @focus="emit('beforeChange')" @input="dial.minValue = num($event); changed()" />
           </div>
           <div class="prop-row">
             <label>Max</label>
             <input type="number" step="1" :value="dial.maxValue"
-              @input="dial.maxValue = num($event); changed()" />
+              @focus="emit('beforeChange')" @input="dial.maxValue = num($event); changed()" />
           </div>
           <div class="prop-row">
             <label>Step</label>
             <input type="number" step="0.1" min="0.01" :value="dial.step"
-              @input="dial.step = num($event); changed()" />
+              @focus="emit('beforeChange')" @input="dial.step = num($event); changed()" />
           </div>
           <div class="prop-row">
             <label>Tick len</label>
             <input type="number" step="0.1" min="0" :value="dial.tickLength"
-              @input="dial.tickLength = num($event); changed()" />
+              @focus="emit('beforeChange')" @input="dial.tickLength = num($event); changed()" />
           </div>
           <div class="prop-row">
             <label>Tick count</label>
             <input type="number" step="1" min="0" :value="dial.tickCount"
-              @input="dial.tickCount = num($event); changed()" />
+              @focus="emit('beforeChange')" @input="dial.tickCount = num($event); changed()" />
           </div>
           <div class="prop-row">
             <label>Marker len</label>
             <input type="number" step="0.1" min="0" :value="dial.markerLength"
-              @input="dial.markerLength = num($event); changed()" />
+              @focus="emit('beforeChange')" @input="dial.markerLength = num($event); changed()" />
           </div>
         </div>
         <div class="prop-group">
           <div class="prop-row">
             <label>Hole R</label>
             <input type="number" step="0.1" min="0" :value="dial.holeRadius"
-              @input="dial.holeRadius = num($event); changed()" />
+              @focus="emit('beforeChange')" @input="dial.holeRadius = num($event); changed()" />
           </div>
           <div class="prop-row">
             <label>Hole depth</label>
             <input type="number" step="0.1" min="0" :value="dial.holeDepth"
-              @input="dial.holeDepth = num($event); changed()" />
+              @focus="emit('beforeChange')" @input="dial.holeDepth = num($event); changed()" />
           </div>
           <div class="prop-row">
             <label>Hole tool</label>
@@ -184,12 +184,12 @@ function changed(): void { emit('change') }
           <div class="prop-row">
             <label>Text</label>
             <input type="text" :value="text.text"
-              @input="text.text = ($event.target as HTMLInputElement).value; changed()" />
+              @focus="emit('beforeChange')" @input="text.text = ($event.target as HTMLInputElement).value; changed()" />
           </div>
           <div class="prop-row">
             <label>Font size</label>
             <input type="number" step="0.5" min="0.5" :value="text.font.size"
-              @input="text.font.size = num($event); changed()" />
+              @focus="emit('beforeChange')" @input="text.font.size = num($event); changed()" />
           </div>
         </div>
       </template>
@@ -203,29 +203,29 @@ function changed(): void { emit('change') }
         <div class="prop-row">
           <label>Width</label>
           <input type="number" step="0.5" min="1" :value="stock.width"
-            @input="stock.width = num($event); changed()" />
+            @focus="emit('beforeChange')" @input="stock.width = num($event); changed()" />
         </div>
         <div class="prop-row">
           <label>Height</label>
           <input type="number" step="0.5" min="1" :value="stock.height"
-            @input="stock.height = num($event); changed()" />
+            @focus="emit('beforeChange')" @input="stock.height = num($event); changed()" />
         </div>
         <div class="prop-row">
           <label>Thickness</label>
           <input type="number" step="0.1" min="0.1" :value="stock.thickness"
-            @input="stock.thickness = num($event); changed()" />
+            @focus="emit('beforeChange')" @input="stock.thickness = num($event); changed()" />
         </div>
       </div>
       <div class="prop-group">
         <div class="prop-row">
           <label>Center X</label>
           <input type="number" step="0.1" :value="stock.pos.x"
-            @input="stock.pos.x = num($event); changed()" />
+            @focus="emit('beforeChange')" @input="stock.pos.x = num($event); changed()" />
         </div>
         <div class="prop-row">
           <label>Center Y</label>
           <input type="number" step="0.1" :value="stock.pos.y"
-            @input="stock.pos.y = num($event); changed()" />
+            @focus="emit('beforeChange')" @input="stock.pos.y = num($event); changed()" />
         </div>
       </div>
     </template>

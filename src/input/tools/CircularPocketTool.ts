@@ -35,6 +35,7 @@ export class CircularPocketTool implements ToolHandler {
     const w = ctx.vp.screenToWorld(x, y)
     const snapped = applySnap(w.x, w.y, ctx)
     const item = makeDefaultCircularPocket(snapped.x, snapped.y)
+    ctx.pushHistory()
     ctx.store.project.stock.items.push(item)
     ctx.store.selectedItem = item
     ctx.store.activeTool   = 'select'

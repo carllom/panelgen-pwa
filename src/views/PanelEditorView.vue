@@ -5,6 +5,7 @@ import PropertyEditor from '../components/PropertyEditor.vue'
 import ToolSidebar from '../components/ToolSidebar.vue'
 import ConfirmDialog from '../components/ConfirmDialog.vue'
 import { useAppStore } from '../stores/appStore'
+import { useHistoryStore } from '../stores/historyStore'
 import { CircularPocket } from '../domain/CircularPocket'
 import { RectangularPocket } from '../domain/RectangularPocket'
 import { Dial } from '../domain/Dial'
@@ -12,6 +13,12 @@ import { Text } from '../domain/Text'
 import { PolyLine } from '../domain/PolyLine'
 
 const store = useAppStore()
+const historyStore = useHistoryStore()
+
+function onBeforePropertyChange(): void {
+  const stock = store.selectedItem ? store.project?.stock : store.project?.stock
+  if (stock) historyStore.pushHistory(stock)
+}
 
 const stockForEditor = computed(() =>
   !store.selectedItem && store.activeTool === 'select'
@@ -50,7 +57,7 @@ const deleteMessage = computed(() => {
   else if (item instanceof Dial)              type = 'dial'
   else if (item instanceof Text)              type = 'text'
   else if (item instanceof PolyLine)          type = 'polyline'
-  return `Delete this ${type}? This cannot be undone.`
+  return `Delete this ${type}?`
 })
 </script>
 
@@ -64,7 +71,7 @@ const deleteMessage = computed(() => {
           @deleteRequested="onDeleteRequested"
         />
       </main>
-      <PropertyEditor :item="store.selectedItem" :stock="stockForEditor" @change="onPropertyChange" />
+      <PropertyEditor :item="store.selectedItem" :stock="stockForEditor" @change="onPropertyChange" @beforeChange="onBeforePropertyChange" />
     </div>
   </div>
 

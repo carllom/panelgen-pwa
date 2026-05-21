@@ -11,6 +11,7 @@ export interface ToolContext {
   syncViewport(): void
   canvasCoords(e: PointerEvent): { x: number; y: number }
   hitTest(wx: number, wy: number): PanelStockItem | null
+  pushHistory(coalesceKey?: string): void
 }
 
 export interface ToolHandler {

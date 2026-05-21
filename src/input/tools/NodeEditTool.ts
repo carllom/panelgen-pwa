@@ -38,6 +38,7 @@ export class NodeEditTool implements ToolHandler {
     if (sel instanceof PolyLine) {
       const vi = this.hitVertex(world.x, world.y, sel, ctx)
       if (vi !== -1) {
+        ctx.pushHistory()
         this.dragMode = 'vertex'
         this.selectedVertexIdx = vi
         const vx = sel.points[vi].x + sel.pos.x
@@ -52,6 +53,7 @@ export class NodeEditTool implements ToolHandler {
 
     // Item body hit test — move whole item
     if (sel?.inside(world.x, world.y)) {
+      ctx.pushHistory()
       this.dragMode = 'move'
       this.selectedVertexIdx = null
       this.anchorDX = sel.pos.x - world.x
@@ -161,6 +163,7 @@ export class NodeEditTool implements ToolHandler {
     if (dx === 0 && dy === 0) return
 
     e.preventDefault()
+    ctx.pushHistory('arrow-move')
     sel.points[this.selectedVertexIdx] = {
       x: Math.round((pt.x + dx) * 1000) / 1000,
       y: Math.round((pt.y + dy) * 1000) / 1000,

@@ -1,4 +1,5 @@
 import type { PanelGenProject } from './PanelGenProject'
+import type { PanelStock } from './PanelStock'
 import type { PanelStockItem } from './PanelComponent'
 import { CircularPocket } from './CircularPocket'
 import { RectangularPocket } from './RectangularPocket'
@@ -74,18 +75,22 @@ function serializeItem(item: PanelStockItem): object | null {
   return null
 }
 
+export function serializeStock(stock: PanelStock): object {
+  const items = stock.items.map(serializeItem).filter((x): x is object => x !== null)
+  return {
+    pos: { x: 0, y: 0, z: stock.pos.z },
+    width: stock.width,
+    height: stock.height,
+    thickness: stock.thickness,
+    items,
+  }
+}
+
 export function saveProjectToJson(project: PanelGenProject, tools: Tool[]): string {
   const { stock } = project
-  const items = stock.items.map(serializeItem).filter((x): x is object => x !== null)
   const doc = {
     version: '1.0',
-    stock: {
-      pos: { x: 0, y: 0, z: stock.pos.z },
-      width: stock.width,
-      height: stock.height,
-      thickness: stock.thickness,
-      items,
-    },
+    stock: serializeStock(stock),
     tools: tools.map(t => ({
       number: t.number,
       name: t.name,

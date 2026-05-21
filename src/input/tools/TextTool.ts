@@ -81,6 +81,7 @@ export class TextTool implements ToolHandler {
     const w = ctx.vp.screenToWorld(x, y)
     const snapped = applySnap(w.x, w.y, ctx)
     const newText = makeDefaultText(snapped.x, snapped.y, glyphs)
+    ctx.pushHistory()
     ctx.store.project.stock.items.push(newText)
     ctx.store.selectedItem = newText
     ctx.store.activeTool   = 'select'

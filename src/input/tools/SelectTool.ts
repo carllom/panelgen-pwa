@@ -22,6 +22,7 @@ export class SelectTool implements ToolHandler {
     const sel = ctx.store.selectedItem
 
     if (sel?.inside(world.x, world.y)) {
+      ctx.pushHistory()
       this.dragMode  = 'move'
       this.anchorDX  = sel.pos.x - world.x
       this.anchorDY  = sel.pos.y - world.y

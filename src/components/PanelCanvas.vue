@@ -17,6 +17,7 @@ import type { PanelStockItem } from '../domain/PanelComponent'
 import vcoData from '../../examples/vco_compressed.json'
 import { useAppStore } from '../stores/appStore'
 import type { ToolType } from '../stores/appStore'
+import { useHistoryStore } from '../stores/historyStore'
 import type { ToolHandler, ToolContext } from '../input/ToolHandler'
 import { SelectTool } from '../input/tools/SelectTool'
 import { DialTool } from '../input/tools/DialTool'
@@ -29,6 +30,7 @@ import { dispatchKey } from '../input/keybindings'
 import type { KeyBinding } from '../input/keybindings'
 
 const store = useAppStore()
+const historyStore = useHistoryStore()
 const emit = defineEmits<{ deleteRequested: [] }>()
 
 
@@ -96,6 +98,10 @@ const toolCtx: ToolContext = {
     return { x: e.clientX - rect.left, y: e.clientY - rect.top }
   },
   hitTest,
+  pushHistory: (coalesceKey?: string) => {
+    const stock = store.project?.stock
+    if (stock) historyStore.pushHistory(stock, coalesceKey)
+  },
 }
 
 function activeTool(): ToolHandler {
@@ -250,6 +256,7 @@ async function loadFile(): Promise<void> {
   store.project = await loadProjectFromJson(JSON.parse(text))
   if (store.tools.length === 0 && store.project.tools.length > 0)
     store.tools = store.project.tools.map(t => ({ ...t }))
+  historyStore.reset()
   vp.fitToStock(store.project.stock)
   syncViewport()
   scheduleRender()
@@ -258,6 +265,7 @@ async function loadFile(): Promise<void> {
 function deleteSelected(): void {
   const item = store.selectedItem
   if (!item || !store.project?.stock) return
+  historyStore.pushHistory(store.project.stock)
   const idx = store.project.stock.items.indexOf(item)
   if (idx !== -1) store.project.stock.items.splice(idx, 1)
   store.selectedItem = null
@@ -292,6 +300,7 @@ watch(() => store.pendingNew, (val) => {
   store.selectedItem = null
   store.fileHandle   = null
   store.saveFileName = 'panel.json'
+  historyStore.reset()
   vp.fitToStock(p.stock)
   syncViewport()
   scheduleRender()
@@ -337,6 +346,8 @@ function onWheel(e: WheelEvent): void {
 function moveItem(dx: number, dy: number): void {
   const item = store.selectedItem
   if (!item) return
+  const stock = store.project?.stock
+  if (stock) historyStore.pushHistory(stock, 'arrow-move')
   item.pos.x = Math.round((item.pos.x + dx) * 1000) / 1000
   item.pos.y = Math.round((item.pos.y + dy) * 1000) / 1000
   store.notifyItemChanged()
@@ -350,7 +361,23 @@ const stepY    = () => store.snapToGrid && store.gridY > 0 ? store.gridY : 1.0
 
 const setTool = (t: ToolType) => () => { store.activeTool = t; scheduleRender() }
 
+function applyHistoryStock(stock: ReturnType<typeof historyStore.undo>): void {
+  if (!stock || !store.project) return
+  store.project.stock = stock
+  store.selectedItem = null
+  store.notifyItemChanged()
+  scheduleRender()
+}
+
 const keyBindings: KeyBinding[] = [
+  { key: 'z', ctrl: true, shift: false, action: () => {
+    const stock = store.project?.stock
+    if (stock && glyphCache) applyHistoryStock(historyStore.undo(stock, glyphCache))
+  }},
+  { key: 'y', ctrl: true, action: () => {
+    const stock = store.project?.stock
+    if (stock && glyphCache) applyHistoryStock(historyStore.redo(stock, glyphCache))
+  }},
   { key: 'Escape', guard: notSel, action: () => { store.activeTool = 'select'; scheduleRender() } },
   { key: 'Enter',  guard: () => store.activeTool === 'select' && store.selectedItem instanceof PolyLine, action: setTool('nodeEdit') },
   { key: 'v', action: setTool('select')         },
