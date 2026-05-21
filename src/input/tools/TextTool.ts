@@ -7,9 +7,6 @@ import { FontFace } from '../../domain/HersheyFont'
 import type { GlyphMap } from '../../domain/HersheyFont'
 import { applySnap } from './snapUtils'
 
-const COLOR_PREVIEW     = 'rgba(79, 195, 247, 0.55)'
-const COLOR_PREVIEW_BOX = 'rgba(79, 195, 247, 0.25)'
-
 function makeDefaultText(x: number, y: number, glyphs: GlyphMap): Text {
   const t = new Text('Label', glyphs)
   t.pos = { x, y, z: 0 }
@@ -61,13 +58,13 @@ export class TextTool implements ToolHandler {
 
     ctx2d.beginPath()
     preview.draw(drw)
-    ctx2d.strokeStyle = COLOR_PREVIEW
+    ctx2d.strokeStyle = ctx.store.colorPreviewRgba
     ctx2d.lineWidth   = lw
     ctx2d.stroke()
 
     if (xr.minX <= xr.maxX) {
       const pad = 2 * lw
-      ctx2d.strokeStyle = COLOR_PREVIEW_BOX
+      ctx2d.strokeStyle = ctx.store.colorPreviewBoxRgba
       ctx2d.lineWidth   = lw
       ctx2d.setLineDash([4 * lw, 2 * lw])
       ctx2d.strokeRect(xr.minX - pad, xr.minY - pad,

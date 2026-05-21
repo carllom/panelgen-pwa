@@ -41,6 +41,39 @@ const store = useAppStore()
         </label>
       </div>
     </section>
+
+    <section class="settings-section">
+      <h3 class="section-title">Colors</h3>
+
+      <div class="setting-row">
+        <span class="setting-label">Pockets</span>
+        <input type="color" v-model="store.colorPocket" />
+      </div>
+
+      <div class="setting-row">
+        <span class="setting-label">Engraving</span>
+        <input type="color" v-model="store.colorEngrave" />
+      </div>
+
+      <div class="setting-row">
+        <span class="setting-label">Border</span>
+        <input type="color" v-model="store.colorBorder" />
+      </div>
+
+      <div class="setting-row">
+        <span class="setting-label">Preview</span>
+        <input type="color" v-model="store.colorPreview" />
+        <span class="setting-label" style="min-width:unset">Fill</span>
+        <input type="range" min="0" max="1" step="0.01" v-model.number="store.colorPreviewAlpha" class="alpha-slider" />
+        <span class="alpha-value">{{ Math.round(store.colorPreviewAlpha * 100) }}%</span>
+      </div>
+
+      <div class="setting-row setting-row--indent">
+        <span class="setting-label">Box outline</span>
+        <input type="range" min="0" max="1" step="0.01" v-model.number="store.colorPreviewBoxAlpha" class="alpha-slider" />
+        <span class="alpha-value">{{ Math.round(store.colorPreviewBoxAlpha * 100) }}%</span>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -132,5 +165,27 @@ const store = useAppStore()
 .grid-input-group input:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+input[type="color"] {
+  width: 28px;
+  height: 22px;
+  padding: 1px 2px;
+  border: 1px solid #1e3a5a;
+  border-radius: 3px;
+  background: #0d1b35;
+  cursor: pointer;
+}
+
+.alpha-slider {
+  width: 80px;
+  accent-color: #4fc3f7;
+}
+
+.alpha-value {
+  font-size: 11px;
+  color: #8899bb;
+  min-width: 32px;
+  text-align: right;
 }
 </style>

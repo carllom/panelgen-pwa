@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
-import { shallowRef, ref } from 'vue'
+import { shallowRef, ref, computed } from 'vue'
 import type { PanelStockItem } from '../domain/PanelComponent'
 import type { PanelGenProject } from '../domain/PanelGenProject'
+import { hexToRgba } from '../utils/color'
 
 export type ToolType = 'select' | 'dial' | 'text' | 'polyline' | 'circularPocket' | 'rectPocket'
 
@@ -26,6 +27,17 @@ export const useAppStore = defineStore('app', () => {
   const gridX = ref(5)
   const gridY = ref(5)
 
+  // Canvas colors (persisted)
+  const colorPocket          = ref('#f0a040')
+  const colorEngrave         = ref('#4fc3f7')
+  const colorBorder          = ref('#555555')
+  const colorPreview         = ref('#4fc3f7')
+  const colorPreviewAlpha    = ref(0.55)
+  const colorPreviewBoxAlpha = ref(0.25)
+
+  const colorPreviewRgba    = computed(() => hexToRgba(colorPreview.value, colorPreviewAlpha.value))
+  const colorPreviewBoxRgba = computed(() => hexToRgba(colorPreview.value, colorPreviewBoxAlpha.value))
+
   // Transient
   const pendingLoad = ref(false)
 
@@ -35,9 +47,20 @@ export const useAppStore = defineStore('app', () => {
   const panX = ref(0)
   const panY = ref(0)
 
-  return { project, selectedItem, activeTool, itemVersion, notifyItemChanged, alwaysDelete, pendingLoad, snapToGrid, gridX, gridY, viewportInitialized, zoom, panX, panY }
+  return {
+    project, selectedItem, activeTool, itemVersion, notifyItemChanged,
+    alwaysDelete, pendingLoad, snapToGrid, gridX, gridY,
+    colorPocket, colorEngrave, colorBorder,
+    colorPreview, colorPreviewAlpha, colorPreviewBoxAlpha,
+    colorPreviewRgba, colorPreviewBoxRgba,
+    viewportInitialized, zoom, panX, panY,
+  }
 }, {
   persist: {
-    pick: ['alwaysDelete', 'snapToGrid', 'gridX', 'gridY'],
+    pick: [
+      'alwaysDelete', 'snapToGrid', 'gridX', 'gridY',
+      'colorPocket', 'colorEngrave', 'colorBorder',
+      'colorPreview', 'colorPreviewAlpha', 'colorPreviewBoxAlpha',
+    ],
   },
 })

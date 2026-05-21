@@ -24,9 +24,6 @@ import type { KeyBinding } from '../input/keybindings'
 const store = useAppStore()
 const emit = defineEmits<{ deleteRequested: [] }>()
 
-const COLOR_POCKET  = '#f0a040'
-const COLOR_ENGRAVE = '#4fc3f7'
-const COLOR_BORDER  = '#555'
 
 // ─── Renderer state ───────────────────────────────────────────────────────────
 
@@ -116,7 +113,7 @@ function render(): void {
   drw.lineTo(pos.x + width / 2, pos.y + height / 2)
   drw.lineTo(pos.x - width / 2, pos.y + height / 2)
   drw.lineTo(pos.x - width / 2, pos.y - height / 2)
-  ctx.strokeStyle = COLOR_BORDER
+  ctx.strokeStyle = store.colorBorder
   ctx.lineWidth   = lw
   ctx.stroke()
 
@@ -133,7 +130,7 @@ function render(): void {
       if (vp.isVisible(x - r, y - r, x + r, y + r)) item.drawHole(drw)
     }
   }
-  ctx.strokeStyle = COLOR_POCKET
+  ctx.strokeStyle = store.colorPocket
   ctx.lineWidth   = lw
   ctx.stroke()
 
@@ -145,7 +142,7 @@ function render(): void {
     item.draw(xr)
     if (xr.minX <= xr.maxX && vp.isVisible(xr.minX, xr.minY, xr.maxX, xr.maxY)) item.draw(drw)
   }
-  ctx.strokeStyle = COLOR_ENGRAVE
+  ctx.strokeStyle = store.colorEngrave
   ctx.lineWidth   = lw
   ctx.stroke()
 
