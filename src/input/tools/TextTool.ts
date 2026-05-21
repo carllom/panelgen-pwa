@@ -1,7 +1,7 @@
 import type { ToolHandler, ToolContext } from '../ToolHandler'
 import { CanvasDraw } from '../../renderer/CanvasDraw'
 import { ExtentsRenderer } from '../../domain/ExtentsRenderer'
-import { Dial } from '../../domain/Dial'
+import { Text } from '../../domain/Text'
 import { loadFaceGlyphs } from '../../domain/fontLoader'
 import { FontFace } from '../../domain/HersheyFont'
 import type { GlyphMap } from '../../domain/HersheyFont'
@@ -10,24 +10,13 @@ import { applySnap } from './snapUtils'
 const COLOR_PREVIEW     = 'rgba(79, 195, 247, 0.55)'
 const COLOR_PREVIEW_BOX = 'rgba(79, 195, 247, 0.25)'
 
-function makeDefaultDial(x: number, y: number, glyphs: GlyphMap): Dial {
-  const d = new Dial(glyphs)
-  d.pos              = { x, y, z: 0 }
-  d.innerRadius      = 8
-  d.arcSpan          = 270
-  d.markerLength     = 3
-  d.minValue         = 0
-  d.maxValue         = 10
-  d.step             = 1
-  d.tickLength       = 1.5
-  d.tickCount        = 4
-  d.markerLabelOffset = 1.5
-  d.text             = 'Dial'
-  return d
+function makeDefaultText(x: number, y: number, glyphs: GlyphMap): Text {
+  const t = new Text('Label', glyphs)
+  t.pos = { x, y, z: 0 }
+  return t
 }
 
-
-export class DialTool implements ToolHandler {
+export class TextTool implements ToolHandler {
   readonly cursor = 'none'
   private mouseX = 0
   private mouseY = 0
@@ -63,7 +52,7 @@ export class DialTool implements ToolHandler {
 
     const w = ctx.vp.screenToWorld(this.mouseX, this.mouseY)
     const { x, y } = applySnap(w.x, w.y, ctx)
-    const preview = makeDefaultDial(x, y, glyphs)
+    const preview = makeDefaultText(x, y, glyphs)
     const xr = new ExtentsRenderer()
     preview.draw(xr)
 
@@ -93,9 +82,9 @@ export class DialTool implements ToolHandler {
     const { x, y } = ctx.canvasCoords(e)
     const w = ctx.vp.screenToWorld(x, y)
     const snapped = applySnap(w.x, w.y, ctx)
-    const newDial = makeDefaultDial(snapped.x, snapped.y, glyphs)
-    ctx.store.project.stock.items.push(newDial)
-    ctx.store.selectedItem = newDial
+    const newText = makeDefaultText(snapped.x, snapped.y, glyphs)
+    ctx.store.project.stock.items.push(newText)
+    ctx.store.selectedItem = newText
     ctx.store.activeTool   = 'select'
     ctx.store.notifyItemChanged()
     ctx.scheduleRender()
