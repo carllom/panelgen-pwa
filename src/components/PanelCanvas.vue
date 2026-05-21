@@ -20,6 +20,8 @@ import { DialTool } from '../input/tools/DialTool'
 import { TextTool } from '../input/tools/TextTool'
 import { CircularPocketTool } from '../input/tools/CircularPocketTool'
 import { RectangularPocketTool } from '../input/tools/RectangularPocketTool'
+import { PolylineTool } from '../input/tools/PolylineTool'
+import { NodeEditTool } from '../input/tools/NodeEditTool'
 import { dispatchKey } from '../input/keybindings'
 import type { KeyBinding } from '../input/keybindings'
 
@@ -72,8 +74,10 @@ function hitTest(wx: number, wy: number): PanelStockItem | null {
 
 const toolHandlers: Partial<Record<ToolType, ToolHandler>> = {
   select:         new SelectTool(),
+  nodeEdit:       new NodeEditTool(),
   dial:           new DialTool(),
   text:           new TextTool(),
+  polyline:       new PolylineTool(),
   circularPocket: new CircularPocketTool(),
   rectPocket:     new RectangularPocketTool(),
 }
@@ -298,7 +302,14 @@ const keyBindings: KeyBinding[] = [
   { key: 'ArrowDown',  ctrl: false, shift: false, guard: hasSel, action: () => moveItem(0,     -0.1)  },
 ]
 
+function onDblClick(e: MouseEvent): void {
+  activeTool().onDblClick?.(e, toolCtx)
+}
+
 function onKeyDown(e: KeyboardEvent): void {
+  const tool = activeTool()
+  tool.onKeyDown?.(e, toolCtx)
+  if (e.defaultPrevented) return
   dispatchKey(e, keyBindings)
 }
 
@@ -310,6 +321,7 @@ onMounted(async () => {
   const canvas = canvasRef.value!
   ctx = canvas.getContext('2d')!
   canvas.addEventListener('wheel', onWheel, { passive: false })
+  canvas.addEventListener('dblclick', onDblClick)
   window.addEventListener('keydown', onKeyDown)
 
   loadFaceGlyphs(FontFace.RomanSimplex).then(g => { glyphCache = g })
@@ -353,6 +365,7 @@ onMounted(async () => {
 onUnmounted(() => {
   ro?.disconnect()
   canvasRef.value?.removeEventListener('wheel', onWheel)
+  canvasRef.value?.removeEventListener('dblclick', onDblClick)
   window.removeEventListener('keydown', onKeyDown)
   cancelAnimationFrame(rafId)
 })

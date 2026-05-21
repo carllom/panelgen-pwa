@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { MousePointer2, Gauge, Type, Spline, Cylinder, Box } from 'lucide-vue-next'
+import { MousePointer2, Waypoints, Gauge, Type, Spline, Cylinder, Box } from 'lucide-vue-next'
 import { useAppStore } from '../stores/appStore'
 import type { ToolType } from '../stores/appStore'
 
@@ -7,6 +7,7 @@ const store = useAppStore()
 
 const tools: { id: ToolType; icon: unknown; label: string }[] = [
   { id: 'select',         icon: MousePointer2, label: 'Select'            },
+  { id: 'nodeEdit',       icon: Waypoints,     label: 'Node edit'         },
   { id: 'dial',           icon: Gauge,         label: 'Dial'              },
   { id: 'text',           icon: Type,          label: 'Text'              },
   { id: 'polyline',       icon: Spline,        label: 'Polyline'          },

@@ -22,6 +22,7 @@ const canvasRef = ref<InstanceType<typeof PanelCanvas> | null>(null)
 const showDeleteConfirm = ref(false)
 
 function onPropertyChange(): void {
+  store.notifyItemChanged()
   canvasRef.value?.scheduleRender()
 }
 

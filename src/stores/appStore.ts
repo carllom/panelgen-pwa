@@ -4,7 +4,7 @@ import type { PanelStockItem } from '../domain/PanelComponent'
 import type { PanelGenProject } from '../domain/PanelGenProject'
 import { hexToRgba } from '../utils/color'
 
-export type ToolType = 'select' | 'dial' | 'text' | 'polyline' | 'circularPocket' | 'rectPocket'
+export type ToolType = 'select' | 'nodeEdit' | 'dial' | 'text' | 'polyline' | 'circularPocket' | 'rectPocket'
 
 export const useAppStore = defineStore('app', () => {
   // Active project

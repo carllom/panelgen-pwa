@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { Vec2 } from '../domain/geometry'
+import { useAppStore } from '../stores/appStore'
 
+const store = useAppStore()
 const props = defineProps<{ points: Vec2[] }>()
 const emit = defineEmits<{ change: [] }>()
 
@@ -32,6 +34,7 @@ function addPoint(): void {
 
 <template>
   <div class="point-list">
+    <span style="display:none">{{ store.itemVersion }}</span>
     <div class="point-list-header">
       <span class="col-idx">#</span>
       <span class="col-xy">X</span>

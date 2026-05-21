@@ -22,4 +22,6 @@ export interface ToolHandler {
   onPointerEnter?(ctx: ToolContext): void
   onPointerLeave?(ctx: ToolContext): void
   drawOverlay?(ctx2d: CanvasRenderingContext2D, ctx: ToolContext): void
+  onKeyDown?(e: KeyboardEvent, ctx: ToolContext): void
+  onDblClick?(e: MouseEvent, ctx: ToolContext): void
 }
