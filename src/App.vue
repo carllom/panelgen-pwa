@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { RouterView, RouterLink, useRouter } from 'vue-router'
-import { FolderOpen } from '@lucide/vue'
+import { FolderOpen, Save } from '@lucide/vue'
 import { useAppStore } from './stores/appStore'
+import { saveProjectToJson } from './domain/projectSaver'
 
 const router = useRouter()
 const store = useAppStore()
@@ -9,6 +10,47 @@ const store = useAppStore()
 async function onLoad(): Promise<void> {
   await router.push('/')
   store.pendingLoad = true
+}
+
+async function onSave(): Promise<void> {
+  if (!store.project) return
+  const json = saveProjectToJson(store.project, store.tools)
+
+  try {
+    if (store.fileHandle) {
+      const writable = await store.fileHandle.createWritable()
+      await writable.write(json)
+      await writable.close()
+      return
+    }
+
+    if ('showSaveFilePicker' in window) {
+      const handle = await (window as Window & typeof globalThis & {
+        showSaveFilePicker(opts: object): Promise<FileSystemFileHandle>
+      }).showSaveFilePicker({
+        suggestedName: store.saveFileName,
+        types: [{ description: 'PanelGen Project', accept: { 'application/json': ['.json'] } }],
+      })
+      const writable = await handle.createWritable()
+      await writable.write(json)
+      await writable.close()
+      store.fileHandle = handle
+      store.saveFileName = handle.name
+      return
+    }
+  } catch (e) {
+    if ((e as DOMException).name !== 'AbortError') throw e
+    return
+  }
+
+  // Fallback: trigger download
+  const blob = new Blob([json], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = store.saveFileName
+  a.click()
+  URL.revokeObjectURL(url)
 }
 </script>
 
@@ -18,6 +60,9 @@ async function onLoad(): Promise<void> {
       <span class="app-title">PanelGen</span>
       <button class="icon-btn" title="Load panel" @click="onLoad">
         <FolderOpen :size="18" :stroke-width="1.5" />
+      </button>
+      <button class="icon-btn" title="Save panel" :disabled="!store.project" @click="onSave">
+        <Save :size="18" :stroke-width="1.5" />
       </button>
       <nav class="header-nav">
         <RouterLink to="/" class="nav-link">Editor</RouterLink>

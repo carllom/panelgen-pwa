@@ -45,6 +45,8 @@ export const useAppStore = defineStore('app', () => {
 
   // Transient
   const pendingLoad = ref(false)
+  const saveFileName = ref('panel.json')
+  const fileHandle = ref<FileSystemFileHandle | null>(null)
 
   // Viewport state — mirrors Viewport class values for reactive reads outside canvas
   const viewportInitialized = ref(false)
@@ -55,7 +57,7 @@ export const useAppStore = defineStore('app', () => {
   return {
     project, selectedItem, activeTool, itemVersion, notifyItemChanged,
     tools,
-    alwaysDelete, pendingLoad, snapToGrid, gridX, gridY,
+    alwaysDelete, pendingLoad, saveFileName, fileHandle, snapToGrid, gridX, gridY,
     colorPocket, colorEngrave, colorBorder,
     colorPreview, colorPreviewAlpha, colorPreviewBoxAlpha,
     colorPreviewRgba, colorPreviewBoxRgba,

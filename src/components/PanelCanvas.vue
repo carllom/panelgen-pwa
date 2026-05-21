@@ -208,6 +208,8 @@ async function loadFile(): Promise<void> {
         multiple: false,
       })
       text = await (await handle.getFile()).text()
+      store.fileHandle = handle
+      store.saveFileName = handle.name
     } else {
       text = await new Promise<string>((resolve, reject) => {
         const input = document.createElement('input')
@@ -215,8 +217,10 @@ async function loadFile(): Promise<void> {
         input.accept = '.json'
         input.onchange = async () => {
           const file = input.files?.[0]
-          if (file) resolve(await file.text())
-          else reject(new Error('no file'))
+          if (!file) { reject(new Error('no file')); return }
+          store.fileHandle = null
+          store.saveFileName = file.name
+          resolve(await file.text())
         }
         input.click()
       })

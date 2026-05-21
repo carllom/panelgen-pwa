@@ -36,7 +36,10 @@ interface JDial extends JItemBase {
 interface JText extends JItemBase {
   type: 'Text'; text: string; fontSize: number; anchor: string
 }
-interface JTool { number: number; diameter: number; zStep: number }
+interface JTool {
+  number: number; diameter: number; zStep: number
+  name?: string; feedRate?: number; zFeedRate?: number; rpm?: number
+}
 
 interface JProject {
   stock: { pos: JPos; width: number; height: number; thickness: number; items: JItemBase[] }
@@ -71,7 +74,15 @@ export async function loadProjectFromJson(raw: unknown): Promise<PanelGenProject
 
   const project = new PanelGenProject()
   project.stock = stock
-  project.tools = data.tools.map(t => ({ number: t.number, diameter: t.diameter, zStep: t.zStep }))
+  project.tools = data.tools.map(t => ({
+    number: t.number,
+    name: t.name ?? '',
+    diameter: t.diameter,
+    zStep: t.zStep,
+    feedRate: t.feedRate ?? 800,
+    zFeedRate: t.zFeedRate ?? 300,
+    rpm: t.rpm ?? 10000,
+  }))
   return project
 }
 
