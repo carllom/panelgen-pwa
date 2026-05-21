@@ -18,6 +18,8 @@ import type { ToolHandler, ToolContext } from '../input/ToolHandler'
 import { SelectTool } from '../input/tools/SelectTool'
 import { DialTool } from '../input/tools/DialTool'
 import { TextTool } from '../input/tools/TextTool'
+import { CircularPocketTool } from '../input/tools/CircularPocketTool'
+import { RectangularPocketTool } from '../input/tools/RectangularPocketTool'
 import { dispatchKey } from '../input/keybindings'
 import type { KeyBinding } from '../input/keybindings'
 
@@ -69,9 +71,11 @@ function hitTest(wx: number, wy: number): PanelStockItem | null {
 // ─── Tool infrastructure ──────────────────────────────────────────────────────
 
 const toolHandlers: Partial<Record<ToolType, ToolHandler>> = {
-  select: new SelectTool(),
-  dial:   new DialTool(),
-  text:   new TextTool(),
+  select:         new SelectTool(),
+  dial:           new DialTool(),
+  text:           new TextTool(),
+  circularPocket: new CircularPocketTool(),
+  rectPocket:     new RectangularPocketTool(),
 }
 
 const toolCtx: ToolContext = {
