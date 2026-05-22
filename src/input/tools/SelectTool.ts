@@ -14,6 +14,9 @@ export class SelectTool implements ToolHandler {
   // move state — anchor offset from click point to item origin (world space)
   private anchorDX = 0
   private anchorDY = 0
+  // item's world position at the moment the drag started (for constrained move)
+  private originX = 0
+  private originY = 0
 
   onPointerDown(e: PointerEvent, ctx: ToolContext): void {
     if (e.button !== 0) return
@@ -26,6 +29,8 @@ export class SelectTool implements ToolHandler {
       this.dragMode  = 'move'
       this.anchorDX  = sel.pos.x - world.x
       this.anchorDY  = sel.pos.y - world.y
+      this.originX   = sel.pos.x
+      this.originY   = sel.pos.y
     } else {
       this.dragMode      = 'pan'
       this.totalMovement = 0
@@ -41,13 +46,28 @@ export class SelectTool implements ToolHandler {
       if (!item) return
       const { x, y } = ctx.canvasCoords(e)
       const world = ctx.vp.screenToWorld(x, y)
-      let newX = Math.round((world.x + this.anchorDX) * 1000) / 1000
-      let newY = Math.round((world.y + this.anchorDY) * 1000) / 1000
+      let newX = world.x + this.anchorDX
+      let newY = world.y + this.anchorDY
       const { snapToGrid, gridX, gridY } = ctx.store
-      if (!e.ctrlKey && snapToGrid && gridX > 0 && gridY > 0) {
-        newX = Math.round(Math.round(newX / gridX) * gridX * 1000) / 1000
-        newY = Math.round(Math.round(newY / gridY) * gridY * 1000) / 1000
+      if (e.shiftKey) {
+        // Constrain to nearest 45° ray from the drag-start position
+        const dx = newX - this.originX
+        const dy = newY - this.originY
+        const dist = Math.sqrt(dx * dx + dy * dy)
+        if (dist > 0) {
+          const snapAngle = Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) * (Math.PI / 4)
+          newX = this.originX + dist * Math.cos(snapAngle)
+          newY = this.originY + dist * Math.sin(snapAngle)
+        } else {
+          newX = this.originX
+          newY = this.originY
+        }
+      } else if (!e.ctrlKey && snapToGrid && gridX > 0 && gridY > 0) {
+        newX = Math.round(newX / gridX) * gridX
+        newY = Math.round(newY / gridY) * gridY
       }
+      newX = Math.round(newX * 1000) / 1000
+      newY = Math.round(newY * 1000) / 1000
       item.pos.x = newX
       item.pos.y = newY
       ctx.store.notifyItemChanged()
