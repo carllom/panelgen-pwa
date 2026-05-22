@@ -31,18 +31,24 @@ export class DexelHeightmap {
     })
   }
 
-  /** Conical V-bit: depth tapers linearly from z at centre to 0 at the cone edge. */
-  applyVBit(x0: number, y0: number, x1: number, y1: number, z: number, includedAngleDeg: number): void {
+  /**
+   * Truncated V-bit: flat tip of radius tipDiameterMm/2, then cone flanks at includedAngleDeg.
+   * Inside the tip radius the depth is z (full commanded depth).
+   * Beyond the tip the depth rises linearly toward the surface.
+   */
+  applyVBit(x0: number, y0: number, x1: number, y1: number, z: number, includedAngleDeg: number, tipDiameterMm = 0): void {
     const halfAngle = (includedAngleDeg / 2) * (Math.PI / 180)
     const tanHalf = Math.tan(halfAngle)
-    // Cone radius at this depth: where depth reaches 0 (surface)
-    const effectiveRadiusMm = Math.abs(z) * tanHalf
+    const tipRadiusMm = tipDiameterMm / 2
+    // Outermost radius where the cone flank reaches the surface (z = 0)
+    const effectiveRadiusMm = tipRadiusMm + Math.abs(z) * tanHalf
     const effectiveRadiusPx = effectiveRadiusMm * this.pxPerMm
 
     this._rasterize(x0, y0, x1, y1, (cx, cy) => {
       this._stamp(cx, cy, Math.ceil(effectiveRadiusPx), (distPx) => {
         const distMm = distPx / this.pxPerMm
-        const depth = z + distMm / tanHalf   // negative at centre, rising to 0 at edge
+        if (distMm <= tipRadiusMm) return z                       // flat tip: full depth
+        const depth = z + (distMm - tipRadiusMm) / tanHalf       // cone flank
         return depth < 0 ? depth : null
       })
     })
