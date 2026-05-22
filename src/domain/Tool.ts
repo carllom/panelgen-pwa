@@ -1,3 +1,5 @@
+export type ToolType = 'endmill' | 'vbit'
+
 export interface Tool {
   number: number
   name: string
@@ -6,6 +8,8 @@ export interface Tool {
   feedRate: number
   zFeedRate: number
   rpm: number
+  toolType: ToolType
+  vbitAngle: number  // included angle in degrees; only used when toolType === 'vbit'
 }
 
 export function toolRadius(t: Tool): number { return t.diameter / 2 }
@@ -19,6 +23,8 @@ export function makeTool(overrides?: Partial<Tool>): Tool {
     feedRate: 800,
     zFeedRate: 300,
     rpm: 10000,
+    toolType: 'endmill',
+    vbitAngle: 90,
     ...overrides,
   }
 }

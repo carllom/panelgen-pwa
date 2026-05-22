@@ -3,6 +3,7 @@ import PanelEditorView from '../views/PanelEditorView.vue'
 import SettingsView from '../views/SettingsView.vue'
 import GCodeExportView from '../views/GCodeExportView.vue'
 import ToolsView from '../views/ToolsView.vue'
+import PreviewView from '../views/PreviewView.vue'
 
 export default createRouter({
   history: createWebHashHistory(),
@@ -11,5 +12,6 @@ export default createRouter({
     { path: '/settings', component: SettingsView    },
     { path: '/gcode',    component: GCodeExportView },
     { path: '/tools',    component: ToolsView       },
+    { path: '/preview',  component: PreviewView     },
   ],
 })

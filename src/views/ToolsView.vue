@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import { useAppStore } from '../stores/appStore'
 import { makeTool } from '../domain/Tool'
-import type { Tool } from '../domain/Tool'
+import type { Tool, ToolType } from '../domain/Tool'
 
 const store = useAppStore()
 
@@ -95,12 +95,31 @@ function num(e: Event): number {
         <div class="editor-section">
           <div class="editor-section-title">Geometry</div>
           <div class="field-row">
+            <label class="field-label has-tooltip" data-tooltip="Cylindrical end mill or conical V-bit">Tool Type</label>
+            <select
+              :value="selected.toolType"
+              @change="selected.toolType = ($event.target as HTMLSelectElement).value as ToolType"
+              class="type-select"
+            >
+              <option value="endmill">End Mill</option>
+              <option value="vbit">V-Bit</option>
+            </select>
+          </div>
+          <div class="field-row">
             <label class="field-label has-tooltip" data-tooltip="Tool cutting diameter in mm">Diameter</label>
             <input type="number" step="0.1" min="0.01"
               :value="selected.diameter"
               @change="selected.diameter = num($event)"
             />
             <span class="unit">mm</span>
+          </div>
+          <div class="field-row" v-if="selected.toolType === 'vbit'">
+            <label class="field-label has-tooltip" data-tooltip="Included (full) angle of the V-bit tip in degrees — e.g. 90° gives 45° per side">V-Angle</label>
+            <input type="number" step="1" min="1" max="179"
+              :value="selected.vbitAngle"
+              @change="selected.vbitAngle = num($event)"
+            />
+            <span class="unit">°</span>
           </div>
           <div class="field-row">
             <label class="field-label has-tooltip" data-tooltip="Depth of cut per pass (pecking step) in mm">Z-Step</label>
@@ -330,7 +349,8 @@ function num(e: Event): number {
   font-size: 12px;
 }
 
-.field-row input {
+.field-row input,
+.type-select {
   flex: 1;
   min-width: 0;
   background: #0d1b35;

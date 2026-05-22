@@ -91,6 +91,7 @@ async function onSave(): Promise<void> {
         <RouterLink to="/tools" class="nav-link">Tools</RouterLink>
         <RouterLink to="/settings" class="nav-link">Settings</RouterLink>
         <RouterLink to="/gcode" class="nav-link">Export</RouterLink>
+        <RouterLink to="/preview" class="nav-link">Preview</RouterLink>
       </nav>
     </header>
     <RouterView class="router-view" />
