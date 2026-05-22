@@ -95,6 +95,7 @@ export class Dial extends PanelStockItem {
   generateCode(tool: Tool): string {
     if (tool.number === this.toolNumber) {
       const engr = new GCodeEngraver()
+      engr.engravingDepth = tool.zStep
       this.draw(engr)
       return engr.gCode()
     } else if (tool.number === this.holeToolNumber) {

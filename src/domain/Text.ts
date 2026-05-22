@@ -43,8 +43,9 @@ export class Text extends PanelStockItem {
     this.font.drawString(drw, this.text, this.pos.x + align, this.pos.y)
   }
 
-  generateCode(_tool: Tool): string {
+  generateCode(tool: Tool): string {
     const engr = new GCodeEngraver()
+    engr.engravingDepth = tool.zStep
     this.draw(engr)
     return engr.gCode()
   }

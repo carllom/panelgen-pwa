@@ -33,8 +33,8 @@ export class PolyLine extends PanelStockItem {
   }
 
   generateCode(tool: Tool): string {
-    void tool
     const engr = new GCodeEngraver()
+    engr.engravingDepth = tool.zStep
     this.draw(engr)
     return engr.gCode()
   }
