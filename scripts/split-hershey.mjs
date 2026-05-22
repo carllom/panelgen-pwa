@@ -34,13 +34,21 @@ const RANGES = [
 const raw   = readFileSync(join(srcDir, 'hershey'), 'utf8')
 const lines = raw.split(/\r?\n/).filter(l => l.trim() !== '')
 
+// The Hershey data format uses fixed-width fields: glyph ID is always in
+// columns 0-4 (5 chars, right-justified). Some lines have no space between
+// the ID and the vertex count (e.g. "  994113D_..."), so a greedy \d+ regex
+// would incorrectly read "994113" instead of "994". Using substring(0,5) is
+// the only safe approach.
+function glyphId(line) {
+  return parseInt(line.substring(0, 5), 10)
+}
+
 let total = 0
 for (const { file, min, max } of RANGES) {
   const filtered = lines.filter(line => {
-    const m = line.match(/^\s*(\d+)/)
-    if (!m) return false
-    const id = parseInt(m[1], 10)
-    return id >= min && id <= max
+    if (line.length < 5) return false
+    const id = glyphId(line)
+    return Number.isFinite(id) && id >= min && id <= max
   })
   // Write with LF endings
   const out = filtered.join('\n') + '\n'

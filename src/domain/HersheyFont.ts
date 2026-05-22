@@ -27,14 +27,29 @@ export interface GlyphPoint { x: number; y: number }
 export interface Glyph { posL: number; posR: number; data: GlyphPoint[] }
 export type GlyphMap = Map<number, Glyph>
 
-/** Parse a raw Hershey font text file (from archive/PanelGen.Cli/data/hershey) into a GlyphMap. */
+/**
+ * Parse a raw Hershey font text file into a GlyphMap.
+ *
+ * Each glyph occupies one line with strictly fixed-width fields — no delimiters:
+ *   cols  0– 4  glyph ID   (5 chars, right-justified)
+ *   cols  5– 7  numVert    (3 chars, right-justified) — total vertices incl. the L/R pair
+ *   col   8     posL char  (ASCII value − 82 gives the left bearing)
+ *   col   9     posR char  (ASCII value − 82 gives the right bearing)
+ *   cols 10+    coordinate pairs, two chars each (ASCII value − 82 for x and y)
+ *               The pair (' ','R') == (−50, 0) is the pen-up marker.
+ *
+ * Some source lines omit the space that would normally separate the ID from
+ * numVert (e.g. "  994113D_..." instead of "  994 113D_...").  Because all
+ * fields are at fixed byte offsets this causes no parsing error — the
+ * fixed-width substring reads are unaffected by the missing space.
+ */
 export function parseHersheyData(text: string): GlyphMap {
   const map: GlyphMap = new Map()
   for (const line of text.split(/\r?\n/)) {
-    if (!line.trim()) continue
+    if (!line.trim() || line.length < 10) continue
     const charNum = parseInt(line.substring(0, 5), 10)
     const numVert = parseInt(line.substring(5, 8), 10)
-    const posL = line.charCodeAt(8) - 82 // 'R'
+    const posL = line.charCodeAt(8) - 82 // 'R' == 82
     const posR = line.charCodeAt(9) - 82
     const available = Math.floor((line.length - 10) / 2)
     const count = Math.min(numVert - 1, available)
