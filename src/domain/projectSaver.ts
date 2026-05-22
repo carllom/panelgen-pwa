@@ -6,6 +6,7 @@ import { RectangularPocket } from './RectangularPocket'
 import { PolyLine } from './PolyLine'
 import { Dial } from './Dial'
 import { Text, Alignment } from './Text'
+import { FontFace } from './HersheyFont'
 import type { Tool } from './Tool'
 
 function serializeItem(item: PanelStockItem): object | null {
@@ -58,6 +59,7 @@ function serializeItem(item: PanelStockItem): object | null {
       markerLabelOffset: item.markerLabelOffset,
       markerFontSize: item.markerFont.size,
       labelFontSize: item.labelFont.size,
+      labelFontFace: FontFace[item.labelFontFace],
     }
   }
 
@@ -66,6 +68,7 @@ function serializeItem(item: PanelStockItem): object | null {
       type: 'Text', ...base,
       text: item.text,
       fontSize: item.font.size,
+      fontFace: FontFace[item.fontFace],
       anchor: item.anchor === Alignment.Left ? 'Left'
              : item.anchor === Alignment.Right ? 'Right'
              : 'Center',

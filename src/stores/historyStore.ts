@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { PanelStock } from '../domain/PanelStock'
-import type { GlyphMap } from '../domain/HersheyFont'
 import { serializeStock } from '../domain/projectSaver'
 import { loadStockFromRaw } from '../domain/projectLoader'
 
@@ -23,20 +22,20 @@ export const useHistoryStore = defineStore('history', () => {
     lastCoalesceKey.value = coalesceKey ?? null
   }
 
-  function undo(currentStock: PanelStock, glyphs: GlyphMap): PanelStock | null {
+  async function undo(currentStock: PanelStock): Promise<PanelStock | null> {
     if (!past.value.length) return null
     future.value.push(JSON.stringify(serializeStock(currentStock)))
     const snapshot = past.value.pop()!
     lastCoalesceKey.value = null
-    return loadStockFromRaw(JSON.parse(snapshot), glyphs)
+    return loadStockFromRaw(JSON.parse(snapshot))
   }
 
-  function redo(currentStock: PanelStock, glyphs: GlyphMap): PanelStock | null {
+  async function redo(currentStock: PanelStock): Promise<PanelStock | null> {
     if (!future.value.length) return null
     past.value.push(JSON.stringify(serializeStock(currentStock)))
     const snapshot = future.value.pop()!
     lastCoalesceKey.value = null
-    return loadStockFromRaw(JSON.parse(snapshot), glyphs)
+    return loadStockFromRaw(JSON.parse(snapshot))
   }
 
   function reset(): void {

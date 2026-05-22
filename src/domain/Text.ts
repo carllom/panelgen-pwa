@@ -12,12 +12,14 @@ export enum Alignment { Left, Center, Right }
 export class Text extends PanelStockItem {
   text: string
   font: HersheyFont
+  fontFace: FontFace = FontFace.RomanSimplex
   anchor = Alignment.Center
 
-  constructor(text: string, glyphs: GlyphMap) {
+  constructor(text: string, glyphs: GlyphMap, face = FontFace.RomanSimplex) {
     super()
     this.text = text
-    this.font = new HersheyFont(FontFace.RomanSimplex, glyphs)
+    this.fontFace = face
+    this.font = new HersheyFont(face, glyphs)
   }
 
   get extents(): Vec3 {
@@ -48,11 +50,11 @@ export class Text extends PanelStockItem {
   }
 
   clone(): Text {
-    const copy = new Text(this.text, new Map())
+    const copy = new Text(this.text, new Map(), this.fontFace)
     copy.pos = { ...this.pos }
     copy.toolNumber = this.toolNumber
     copy.anchor = this.anchor
-    copy.font = new HersheyFont(FontFace.RomanSimplex, new Map(), this.font.size)
+    copy.font = new HersheyFont(this.fontFace, new Map(), this.font.size)
     return copy
   }
 }

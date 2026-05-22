@@ -26,6 +26,7 @@ export class Dial extends PanelStockItem {
   markerLabelOffset = 1.5
 
   labelFont: HersheyFont
+  labelFontFace: FontFace = FontFace.RomanSimplex
   markerFont: HersheyFont
 
   constructor(glyphs: GlyphMap) {
@@ -129,6 +130,7 @@ export class Dial extends PanelStockItem {
     copy.text = this.text
     copy.markerLabelOffset = this.markerLabelOffset
     copy.labelFont = this.labelFont
+    copy.labelFontFace = this.labelFontFace
     copy.markerFont = this.markerFont
     return copy
   }

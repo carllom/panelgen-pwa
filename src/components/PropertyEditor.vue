@@ -3,16 +3,19 @@ import { computed } from 'vue'
 import type { PanelStockItem } from '../domain/PanelComponent'
 import { PanelStock } from '../domain/PanelStock'
 import { useAppStore } from '../stores/appStore'
-
-const store = useAppStore()
 import { CircularPocket } from '../domain/CircularPocket'
 import { RectangularPocket } from '../domain/RectangularPocket'
 import { Dial } from '../domain/Dial'
 import { Text } from '../domain/Text'
 import { PolyLine } from '../domain/PolyLine'
+import { FontFace, HersheyFont } from '../domain/HersheyFont'
+import { loadFaceGlyphs } from '../domain/fontLoader'
 import PointListEditor from './PointListEditor.vue'
 import ToolSelect from './ToolSelect.vue'
 import CircularStepsEditor from './CircularStepsEditor.vue'
+import FontFaceSelector from './FontFaceSelector.vue'
+
+const store = useAppStore()
 
 const props = defineProps<{ item: PanelStockItem | null; stock?: PanelStock | null }>()
 const emit = defineEmits<{ change: []; beforeChange: [] }>()
@@ -37,6 +40,22 @@ function num(e: Event): number {
 }
 
 function changed(): void { emit('change') }
+
+async function onTextFaceChange(item: Text, face: FontFace): Promise<void> {
+  emit('beforeChange')
+  const glyphs = await loadFaceGlyphs(face)
+  item.font = new HersheyFont(face, glyphs, item.font.size)
+  item.fontFace = face
+  changed()
+}
+
+async function onDialLabelFaceChange(item: Dial, face: FontFace): Promise<void> {
+  emit('beforeChange')
+  const glyphs = await loadFaceGlyphs(face)
+  item.labelFont = new HersheyFont(face, glyphs, item.labelFont.size)
+  item.labelFontFace = face
+  changed()
+}
 </script>
 
 <template>
@@ -107,6 +126,10 @@ function changed(): void { emit('change') }
             <label>Label</label>
             <input type="text" :value="dial.text"
               @focus="emit('beforeChange')" @input="dial.text = ($event.target as HTMLInputElement).value; changed()" />
+          </div>
+          <div class="prop-row">
+            <label>Label font</label>
+            <FontFaceSelector :modelValue="dial.labelFontFace" @update:modelValue="onDialLabelFaceChange(dial, $event)" />
           </div>
           <div class="prop-row">
             <label>Inner R</label>
@@ -185,6 +208,10 @@ function changed(): void { emit('change') }
             <label>Text</label>
             <input type="text" :value="text.text"
               @focus="emit('beforeChange')" @input="text.text = ($event.target as HTMLInputElement).value; changed()" />
+          </div>
+          <div class="prop-row">
+            <label>Font</label>
+            <FontFaceSelector :modelValue="text.fontFace" @update:modelValue="onTextFaceChange(text, $event)" />
           </div>
           <div class="prop-row">
             <label>Font size</label>

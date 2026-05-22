@@ -7,8 +7,7 @@ import { PolyLine } from './PolyLine'
 import { Dial } from './Dial'
 import { Text, Alignment } from './Text'
 import { loadFaceGlyphs } from './fontLoader'
-import { FontFace } from './HersheyFont'
-import type { GlyphMap } from './HersheyFont'
+import { FontFace, HersheyFont } from './HersheyFont'
 
 // ─── JSON schema ──────────────────────────────────────────────────────────────
 
@@ -32,9 +31,10 @@ interface JDial extends JItemBase {
   minValue: number; maxValue: number; step: number
   tickLength: number; tickCount: number; text: string
   markerLabelOffset: number; markerFontSize: number; labelFontSize: number
+  labelFontFace?: string
 }
 interface JText extends JItemBase {
-  type: 'Text'; text: string; fontSize: number; anchor: string
+  type: 'Text'; text: string; fontSize: number; anchor: string; fontFace?: string
 }
 interface JTool {
   number: number; diameter: number; zStep: number
@@ -46,18 +46,23 @@ interface JProject {
   tools: JTool[]
 }
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function parseFontFace(name?: string): FontFace {
+  if (name && name in FontFace) return FontFace[name as keyof typeof FontFace] as unknown as FontFace
+  return FontFace.RomanSimplex
+}
+
 // ─── Public API ───────────────────────────────────────────────────────────────
 
-export function loadStockFromRaw(js: { pos: JPos; width: number; height: number; thickness: number; items: JItemBase[] }, glyphs: GlyphMap): PanelStock {
+export async function loadStockFromRaw(js: { pos: JPos; width: number; height: number; thickness: number; items: JItemBase[] }): Promise<PanelStock> {
   const stock = new PanelStock()
   stock.pos = { x: js.width / 2, y: js.height / 2, z: js.pos.z }
   stock.width = js.width
   stock.height = js.height
   stock.thickness = js.thickness
-  for (const rawItem of js.items) {
-    const item = buildItem(rawItem, glyphs)
-    if (item) stock.items.push(item)
-  }
+  const items = await Promise.all(js.items.map(buildItem))
+  for (const item of items) if (item) stock.items.push(item)
   return stock
 }
 
@@ -72,18 +77,8 @@ export function loadStockFromRaw(js: { pos: JPos; width: number; height: number;
 export async function loadProjectFromJson(raw: unknown): Promise<PanelGenProject> {
   const data = raw as JProject
   const js = data.stock
-  const glyphs = await loadFaceGlyphs(FontFace.RomanSimplex)
 
-  const stock = new PanelStock()
-  stock.pos = { x: js.width / 2, y: js.height / 2, z: js.pos.z }
-  stock.width = js.width
-  stock.height = js.height
-  stock.thickness = js.thickness
-
-  for (const rawItem of js.items) {
-    const item = buildItem(rawItem, glyphs)
-    if (item) stock.items.push(item)
-  }
+  const stock = await loadStockFromRaw(js)
 
   const project = new PanelGenProject()
   project.stock = stock
@@ -101,7 +96,7 @@ export async function loadProjectFromJson(raw: unknown): Promise<PanelGenProject
 
 // ─── Item builder ─────────────────────────────────────────────────────────────
 
-function buildItem(raw: JItemBase, glyphs: GlyphMap): PanelStockItem | null {
+async function buildItem(raw: JItemBase): Promise<PanelStockItem | null> {
   switch (raw.type) {
     case 'CircularPocket': {
       const j = raw as JCircularPocket
@@ -134,7 +129,12 @@ function buildItem(raw: JItemBase, glyphs: GlyphMap): PanelStockItem | null {
     }
     case 'Dial': {
       const j = raw as JDial
-      const item = new Dial(glyphs)
+      const labelFace = parseFontFace(j.labelFontFace)
+      const [defaultGlyphs, labelGlyphs] = await Promise.all([
+        loadFaceGlyphs(FontFace.RomanSimplex),
+        loadFaceGlyphs(labelFace),
+      ])
+      const item = new Dial(defaultGlyphs)
       item.pos = { ...raw.pos }
       item.toolNumber = raw.toolNumber
       item.holeToolNumber = j.holeToolNumber
@@ -151,12 +151,15 @@ function buildItem(raw: JItemBase, glyphs: GlyphMap): PanelStockItem | null {
       item.text = j.text
       item.markerLabelOffset = j.markerLabelOffset
       item.markerFont.size = j.markerFontSize
-      item.labelFont.size = j.labelFontSize
+      item.labelFontFace = labelFace
+      item.labelFont = new HersheyFont(labelFace, labelGlyphs, j.labelFontSize)
       return item
     }
     case 'Text': {
       const j = raw as JText
-      const item = new Text(j.text, glyphs)
+      const face = parseFontFace(j.fontFace)
+      const glyphs = await loadFaceGlyphs(face)
+      const item = new Text(j.text, glyphs, face)
       item.pos = { ...raw.pos }
       item.toolNumber = raw.toolNumber
       item.font.size = j.fontSize

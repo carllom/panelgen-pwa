@@ -361,7 +361,7 @@ const stepY    = () => store.snapToGrid && store.gridY > 0 ? store.gridY : 1.0
 
 const setTool = (t: ToolType) => () => { store.activeTool = t; scheduleRender() }
 
-function applyHistoryStock(stock: ReturnType<typeof historyStore.undo>): void {
+function applyHistoryStock(stock: PanelStock | null): void {
   if (!stock || !store.project) return
   store.project.stock = stock
   store.selectedItem = null
@@ -372,11 +372,11 @@ function applyHistoryStock(stock: ReturnType<typeof historyStore.undo>): void {
 const keyBindings: KeyBinding[] = [
   { key: 'z', ctrl: true, shift: false, action: () => {
     const stock = store.project?.stock
-    if (stock && glyphCache) applyHistoryStock(historyStore.undo(stock, glyphCache))
+    if (stock) void historyStore.undo(stock).then(applyHistoryStock)
   }},
   { key: 'y', ctrl: true, action: () => {
     const stock = store.project?.stock
-    if (stock && glyphCache) applyHistoryStock(historyStore.redo(stock, glyphCache))
+    if (stock) void historyStore.redo(stock).then(applyHistoryStock)
   }},
   { key: 'Escape', guard: notSel, action: () => { store.activeTool = 'select'; scheduleRender() } },
   { key: 'Enter',  guard: () => store.activeTool === 'select' && store.selectedItem instanceof PolyLine, action: setTool('nodeEdit') },
