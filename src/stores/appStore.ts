@@ -37,6 +37,9 @@ export const useAppStore = defineStore('app', () => {
   // Global CNC tool library (persisted)
   const tools = ref<Tool[]>([])
 
+  // GCode generation (persisted)
+  const machineSupportsG68 = ref(false)
+
   // Canvas colors (persisted)
   const colorPocket          = ref('#f0a040')
   const colorEngrave         = ref('#4fc3f7')
@@ -63,6 +66,7 @@ export const useAppStore = defineStore('app', () => {
   return {
     project, selectedItem, activeTool, itemVersion, notifyItemChanged,
     tools,
+    machineSupportsG68,
     alwaysDelete, pendingLoad, pendingNew, saveFileName, fileHandle, snapToGrid, gridX, gridY,
     defaultPanelWidth, defaultPanelHeight, defaultPanelThickness,
     colorPocket, colorEngrave, colorBorder,
@@ -75,6 +79,7 @@ export const useAppStore = defineStore('app', () => {
   persist: {
     pick: [
       'tools',
+      'machineSupportsG68',
       'alwaysDelete', 'snapToGrid', 'gridX', 'gridY',
       'defaultPanelWidth', 'defaultPanelHeight', 'defaultPanelThickness',
       'colorPocket', 'colorEngrave', 'colorBorder',

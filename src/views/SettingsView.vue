@@ -74,6 +74,15 @@ const store = useAppStore()
     </section>
 
     <section class="settings-section">
+      <h3 class="section-title">GCode Generation</h3>
+
+      <label class="setting-row">
+        <input type="checkbox" v-model="store.machineSupportsG68" />
+        <span class="has-tooltip" data-tooltip="Enable G68 coordinate rotation commands in generated G-code">Machine supports G68</span>
+      </label>
+    </section>
+
+    <section class="settings-section">
       <h3 class="section-title">Colors</h3>
 
       <div class="setting-row">

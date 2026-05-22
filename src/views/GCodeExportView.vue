@@ -3,10 +3,18 @@ import { ref, computed } from 'vue'
 import { useAppStore } from '../stores/appStore'
 import { GCodeStatistics } from '../domain/GCodeStatistics'
 import type { GCodeStats } from '../domain/GCodeStatistics'
+import { transformGCode } from '../domain/GCodeTransformer'
 import type { Tool } from '../domain/Tool'
 
 const store = useAppStore()
 const exportByLayer = ref(false)
+const rotationAngle = ref(0)
+
+function applyRotation(code: string): string {
+  if (!rotationAngle.value || !store.project) return code
+  const { width, height } = store.project.stock
+  return transformGCode(code, rotationAngle.value, width, height)
+}
 
 function downloadText(filename: string, text: string): void {
   const blob = new Blob([text], { type: 'text/plain' })
@@ -24,9 +32,9 @@ function exportGCode(): void {
   if (exportByLayer.value) {
     const layers = store.project.generateGCodeByLayer(tools)
     for (const { tool, code } of layers)
-      downloadText(`panel_T${tool.number + 1}.nc`, code)
+      downloadText(`panel_T${tool.number + 1}.nc`, applyRotation(code))
   } else {
-    downloadText('panel.nc', store.project.generateGCode(tools))
+    downloadText('panel.nc', applyRotation(store.project.generateGCode(tools)))
   }
 }
 
@@ -56,13 +64,13 @@ const toolStats = computed<ToolStats[]>(() => {
   if (!store.project) return []
   const tools = store.tools.length ? store.tools : undefined
   return store.project.generateGCodeByLayer(tools)
-    .map(({ tool, code }) => ({ tool, stats: GCodeStatistics.analyze(code) }))
+    .map(({ tool, code }) => ({ tool, stats: GCodeStatistics.analyze(applyRotation(code)) }))
 })
 
 const totalStats = computed<GCodeStats | null>(() => {
   if (!store.project) return null
   const tools = store.tools.length ? store.tools : undefined
-  return GCodeStatistics.analyze(store.project.generateGCode(tools))
+  return GCodeStatistics.analyze(applyRotation(store.project.generateGCode(tools)))
 })
 
 const panel = computed(() => store.project?.stock ?? null)
@@ -77,6 +85,18 @@ const showPerTool = computed(() => toolStats.value.length > 1)
       <input type="checkbox" v-model="exportByLayer" />
       Export by layer (one file per tool)
     </label>
+    <div class="option-row">
+      <span class="option-label">Rotation</span>
+      <input
+        type="number"
+        class="angle-input"
+        v-model.number="rotationAngle"
+        min="0"
+        max="270"
+        step="90"
+      />
+      <span class="option-unit">°</span>
+    </div>
     <button
       class="export-btn"
       :disabled="!store.project"
@@ -215,6 +235,33 @@ h2 {
 .export-btn:disabled {
   opacity: 0.4;
   cursor: default;
+}
+
+.option-label {
+  color: #8899bb;
+  font-size: 0.9rem;
+  min-width: 60px;
+}
+
+.option-unit {
+  color: #8899bb;
+  font-size: 0.9rem;
+}
+
+.angle-input {
+  width: 72px;
+  background: #0d1b35;
+  border: 1px solid #1e3a5a;
+  color: #e0e0e0;
+  border-radius: 3px;
+  padding: 3px 6px;
+  font-size: 0.85rem;
+  font-family: inherit;
+}
+
+.angle-input:focus {
+  outline: none;
+  border-color: #4fc3f7;
 }
 
 .no-project {
