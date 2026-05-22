@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import type { PanelStockItem } from '../domain/PanelComponent'
 import { PanelStock } from '../domain/PanelStock'
+import type { Guide } from '../domain/Guide'
 import { useAppStore } from '../stores/appStore'
 import { CircularPocket } from '../domain/CircularPocket'
 import { RectangularPocket } from '../domain/RectangularPocket'
@@ -17,7 +18,7 @@ import FontFaceSelector from './FontFaceSelector.vue'
 
 const store = useAppStore()
 
-const props = defineProps<{ item: PanelStockItem | null; stock?: PanelStock | null }>()
+const props = defineProps<{ item: PanelStockItem | null; guide?: Guide | null; stock?: PanelStock | null }>()
 const emit = defineEmits<{ change: []; beforeChange: [] }>()
 
 const pocket  = computed(() => props.item instanceof CircularPocket    ? props.item : null)
@@ -60,7 +61,29 @@ async function onDialLabelFaceChange(item: Dial, face: FontFace): Promise<void> 
 
 <template>
   <aside class="prop-panel">
-    <template v-if="item">
+    <!-- Guide -->
+    <template v-if="guide">
+      <div class="prop-header">Guide<span style="display:none">{{ store.guideVersion }}</span></div>
+      <div class="prop-group">
+        <div class="prop-row">
+          <label>Direction</label>
+          <select :value="guide.direction"
+            @focus="emit('beforeChange')"
+            @change="guide.direction = ($event.target as HTMLSelectElement).value as 'horizontal' | 'vertical'; changed()"
+            class="prop-select">
+            <option value="horizontal">Horizontal</option>
+            <option value="vertical">Vertical</option>
+          </select>
+        </div>
+        <div class="prop-row">
+          <label>{{ guide.direction === 'horizontal' ? 'Y' : 'X' }}</label>
+          <input type="number" step="0.1" :value="guide.pos"
+            @focus="emit('beforeChange')" @input="guide.pos = num($event); changed()" />
+        </div>
+      </div>
+    </template>
+
+    <template v-else-if="item">
       <div class="prop-header">{{ typeName }}<span style="display:none">{{ store.itemVersion }}</span></div>
 
       <!-- Common: position -->
@@ -317,6 +340,18 @@ async function onDialLabelFaceChange(item: Dial, face: FontFace): Promise<void> 
 .prop-row input:focus {
   outline: none;
   border-color: #4fc3f7;
+}
+
+.prop-select {
+  flex: 1;
+  min-width: 0;
+  background: #0d1b35;
+  border: 1px solid #1e3a5a;
+  color: #e0e0e0;
+  border-radius: 3px;
+  padding: 2px 4px;
+  font-size: 12px;
+  font-family: inherit;
 }
 
 .prop-count {

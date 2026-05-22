@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { MousePointer2, Waypoints, Gauge, Type, Spline, Cylinder, Box } from '@lucide/vue'
+import { MousePointer2, Waypoints, Gauge, Type, Spline, Cylinder, Box, Ruler } from '@lucide/vue'
 import { useAppStore } from '../stores/appStore'
 import type { ToolType } from '../stores/appStore'
 
@@ -13,6 +13,7 @@ const tools: { id: ToolType; icon: unknown; label: string; key: string }[] = [
   { id: 'polyline',       icon: Spline,        label: 'Polyline',         key: 'P'   },
   { id: 'circularPocket', icon: Cylinder,      label: 'Circular pocket',  key: 'C'   },
   { id: 'rectPocket',     icon: Box,           label: 'Rect. pocket',     key: 'R'   },
+  { id: 'guide',          icon: Ruler,         label: 'Guide',            key: 'G'   },
 ]
 </script>
 

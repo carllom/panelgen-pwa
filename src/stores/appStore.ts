@@ -3,9 +3,10 @@ import { shallowRef, ref, computed } from 'vue'
 import type { PanelStockItem } from '../domain/PanelComponent'
 import type { PanelGenProject } from '../domain/PanelGenProject'
 import type { Tool } from '../domain/Tool'
+import type { Guide } from '../domain/Guide'
 import { hexToRgba } from '../utils/color'
 
-export type ToolType = 'select' | 'nodeEdit' | 'dial' | 'text' | 'polyline' | 'circularPocket' | 'rectPocket'
+export type ToolType = 'select' | 'nodeEdit' | 'dial' | 'text' | 'polyline' | 'circularPocket' | 'rectPocket' | 'guide'
 
 export type PreviewMaterial = 'brushed-metal' | 'anodized' | 'matte' | 'polished'
 
@@ -14,7 +15,8 @@ export const useAppStore = defineStore('app', () => {
   const project = shallowRef<PanelGenProject | null>(null)
 
   // Selection
-  const selectedItem = shallowRef<PanelStockItem | null>(null)
+  const selectedItem  = shallowRef<PanelStockItem | null>(null)
+  const selectedGuide = shallowRef<Guide | null>(null)
 
   // Active toolbar tool
   const activeTool = ref<ToolType>('select')
@@ -24,12 +26,18 @@ export const useAppStore = defineStore('app', () => {
   const itemVersion = ref(0)
   function notifyItemChanged(): void { itemVersion.value++ }
 
+  // Incremented whenever selectedGuide's properties are mutated externally.
+  const guideVersion = ref(0)
+  function notifyGuideChanged(): void { guideVersion.value++ }
+
   // Application settings (persisted)
-  const alwaysDelete   = ref(false)
-  const snapToGrid     = ref(false)
-  const gridX          = ref(5)
-  const gridY          = ref(5)
-  const showOriginAxes = ref(false)
+  const alwaysDelete      = ref(false)
+  const snapToGrid        = ref(false)
+  const gridX             = ref(5)
+  const gridY             = ref(5)
+  const snapToGuides      = ref(true)
+  const guideSnapDistance = ref(10)   // screen pixels
+  const showOriginAxes    = ref(false)
 
   // New-panel defaults (persisted)
   const defaultPanelWidth     = ref(100)
@@ -49,6 +57,9 @@ export const useAppStore = defineStore('app', () => {
   const colorPreview         = ref('#4fc3f7')
   const colorPreviewAlpha    = ref(0.55)
   const colorPreviewBoxAlpha = ref(0.25)
+
+  // Guide color (persisted)
+  const colorGuide = ref('#4488cc')
 
   // 3D preview appearance (persisted)
   const previewMaterial = ref<PreviewMaterial>('brushed-metal')
@@ -70,11 +81,13 @@ export const useAppStore = defineStore('app', () => {
   const panY = ref(0)
 
   return {
-    project, selectedItem, activeTool, itemVersion, notifyItemChanged,
+    project, selectedItem, selectedGuide, activeTool,
+    itemVersion, notifyItemChanged, guideVersion, notifyGuideChanged,
     tools,
     machineSupportsG68,
-    alwaysDelete, pendingLoad, pendingNew, saveFileName, fileHandle, snapToGrid, gridX, gridY,
+    alwaysDelete, pendingLoad, pendingNew, saveFileName, fileHandle, snapToGrid, gridX, gridY, snapToGuides, guideSnapDistance,
     defaultPanelWidth, defaultPanelHeight, defaultPanelThickness,
+    colorGuide,
     colorPocket, colorEngrave, colorBorder,
     colorPreview, colorPreviewAlpha, colorPreviewBoxAlpha,
     colorPreviewRgba, colorPreviewBoxRgba,
@@ -87,8 +100,9 @@ export const useAppStore = defineStore('app', () => {
     pick: [
       'tools',
       'machineSupportsG68',
-      'alwaysDelete', 'snapToGrid', 'gridX', 'gridY',
+      'alwaysDelete', 'snapToGrid', 'gridX', 'gridY', 'snapToGuides', 'guideSnapDistance',
       'defaultPanelWidth', 'defaultPanelHeight', 'defaultPanelThickness',
+      'colorGuide',
       'colorPocket', 'colorEngrave', 'colorBorder',
       'colorPreview', 'colorPreviewAlpha', 'colorPreviewBoxAlpha',
       'previewMaterial', 'previewColor',

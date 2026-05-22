@@ -1,5 +1,6 @@
 import { PanelGenProject } from './PanelGenProject'
 import { PanelStock } from './PanelStock'
+import { Guide } from './Guide'
 import type { PanelStockItem } from './PanelComponent'
 import { CircularPocket } from './CircularPocket'
 import { RectangularPocket } from './RectangularPocket'
@@ -41,8 +42,10 @@ interface JTool {
   name?: string; feedRate?: number; zFeedRate?: number; rpm?: number
 }
 
+interface JGuide { direction: string; pos: number }
+
 interface JProject {
-  stock: { pos: JPos; width: number; height: number; thickness: number; items: JItemBase[] }
+  stock: { pos: JPos; width: number; height: number; thickness: number; items: JItemBase[]; guides?: JGuide[] }
   tools: JTool[]
 }
 
@@ -55,7 +58,7 @@ function parseFontFace(name?: string): FontFace {
 
 // ─── Public API ───────────────────────────────────────────────────────────────
 
-export async function loadStockFromRaw(js: { pos: JPos; width: number; height: number; thickness: number; items: JItemBase[] }): Promise<PanelStock> {
+export async function loadStockFromRaw(js: { pos: JPos; width: number; height: number; thickness: number; items: JItemBase[]; guides?: JGuide[] }): Promise<PanelStock> {
   const stock = new PanelStock()
   stock.pos = { x: js.width / 2, y: js.height / 2, z: js.pos.z }
   stock.width = js.width
@@ -63,6 +66,12 @@ export async function loadStockFromRaw(js: { pos: JPos; width: number; height: n
   stock.thickness = js.thickness
   const items = await Promise.all(js.items.map(buildItem))
   for (const item of items) if (item) stock.items.push(item)
+  for (const jg of js.guides ?? []) {
+    const guide = new Guide()
+    guide.direction = jg.direction === 'vertical' ? 'vertical' : 'horizontal'
+    guide.pos = jg.pos
+    stock.guides.push(guide)
+  }
   return stock
 }
 

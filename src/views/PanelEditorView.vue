@@ -21,7 +21,7 @@ function onBeforePropertyChange(): void {
 }
 
 const stockForEditor = computed(() =>
-  !store.selectedItem && store.activeTool === 'select'
+  !store.selectedItem && !store.selectedGuide && store.activeTool === 'select'
     ? store.project?.stock ?? null
     : null
 )
@@ -34,6 +34,11 @@ function onPropertyChange(): void {
 }
 
 function onDeleteRequested(): void {
+  if (store.selectedGuide) {
+    // Guides delete without confirmation (no destructive side-effects)
+    canvasRef.value?.deleteSelected()
+    return
+  }
   if (!store.selectedItem) return
   if (store.alwaysDelete) {
     canvasRef.value?.deleteSelected()
@@ -71,7 +76,7 @@ const deleteMessage = computed(() => {
           @deleteRequested="onDeleteRequested"
         />
       </main>
-      <PropertyEditor :item="store.selectedItem" :stock="stockForEditor" @change="onPropertyChange" @beforeChange="onBeforePropertyChange" />
+      <PropertyEditor :item="store.selectedItem" :guide="store.selectedGuide" :stock="stockForEditor" @change="onPropertyChange" @beforeChange="onBeforePropertyChange" />
     </div>
   </div>
 

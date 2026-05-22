@@ -80,12 +80,14 @@ function serializeItem(item: PanelStockItem): object | null {
 
 export function serializeStock(stock: PanelStock): object {
   const items = stock.items.map(serializeItem).filter((x): x is object => x !== null)
+  const guides = stock.guides.map(g => ({ direction: g.direction, pos: g.pos }))
   return {
     pos: { x: 0, y: 0, z: stock.pos.z },
     width: stock.width,
     height: stock.height,
     thickness: stock.thickness,
     items,
+    guides,
   }
 }
 

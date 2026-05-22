@@ -42,6 +42,23 @@ const store = useAppStore()
       </div>
 
       <label class="setting-row">
+        <input type="checkbox" v-model="store.snapToGuides" />
+        <span class="has-tooltip" data-tooltip="Snap element positions to guide lines when moving">Snap to guides</span>
+      </label>
+
+      <div class="setting-row setting-row--indent" :class="{ disabled: !store.snapToGuides }">
+        <span class="setting-label has-tooltip" data-tooltip="How close in screen pixels the element must be to snap to a guide">Snap distance</span>
+        <label class="grid-input-group">
+          <input
+            type="number" step="1" min="1"
+            v-model.number="store.guideSnapDistance"
+            :disabled="!store.snapToGuides"
+          />
+          <span>px</span>
+        </label>
+      </div>
+
+      <label class="setting-row">
         <input type="checkbox" v-model="store.showOriginAxes" />
         <span class="has-tooltip" data-tooltip="Display X and Y axis lines through the panel origin">Show origin axes</span>
       </label>
@@ -103,6 +120,11 @@ const store = useAppStore()
 
     <section class="settings-section">
       <h3 class="section-title">Colors</h3>
+
+      <div class="setting-row">
+        <span class="setting-label has-tooltip" data-tooltip="Color used to draw guide lines">Guides</span>
+        <input type="color" v-model="store.colorGuide" />
+      </div>
 
       <div class="setting-row">
         <span class="setting-label has-tooltip" data-tooltip="Color used to draw pocket components">Pockets</span>

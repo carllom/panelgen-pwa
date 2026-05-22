@@ -26,6 +26,8 @@ import { CircularPocketTool } from '../input/tools/CircularPocketTool'
 import { RectangularPocketTool } from '../input/tools/RectangularPocketTool'
 import { PolylineTool } from '../input/tools/PolylineTool'
 import { NodeEditTool } from '../input/tools/NodeEditTool'
+import { GuideTool } from '../input/tools/GuideTool'
+import type { Guide } from '../domain/Guide'
 import { dispatchKey } from '../input/keybindings'
 import type { KeyBinding } from '../input/keybindings'
 
@@ -77,6 +79,8 @@ function hitTest(wx: number, wy: number): PanelStockItem | null {
 
 // ─── Tool infrastructure ──────────────────────────────────────────────────────
 
+const guideTool = new GuideTool()
+
 const toolHandlers: Partial<Record<ToolType, ToolHandler>> = {
   select:         new SelectTool(),
   nodeEdit:       new NodeEditTool(),
@@ -85,6 +89,7 @@ const toolHandlers: Partial<Record<ToolType, ToolHandler>> = {
   polyline:       new PolylineTool(),
   circularPocket: new CircularPocketTool(),
   rectPocket:     new RectangularPocketTool(),
+  guide:          guideTool,
 }
 
 const toolCtx: ToolContext = {
@@ -148,6 +153,29 @@ function render(): void {
   ctx.strokeStyle = store.colorBorder
   ctx.lineWidth   = lw
   ctx.stroke()
+
+  // Guides (below components, above panel outline and origin axes)
+  if (s.guides.length > 0) {
+    const EXTENT = 10000
+    const selGuide = store.selectedGuide
+    ctx.strokeStyle = store.colorGuide
+    ctx.lineWidth   = lw
+    ctx.setLineDash([4 * lw, 4 * lw])
+    for (const guide of s.guides) {
+      ctx.globalAlpha = guide === selGuide ? 0.85 : 0.40
+      ctx.beginPath()
+      if (guide.direction === 'horizontal') {
+        ctx.moveTo(-EXTENT, guide.pos)
+        ctx.lineTo( EXTENT, guide.pos)
+      } else {
+        ctx.moveTo(guide.pos, -EXTENT)
+        ctx.lineTo(guide.pos,  EXTENT)
+      }
+      ctx.stroke()
+    }
+    ctx.setLineDash([])
+    ctx.globalAlpha = 1
+  }
 
   // Pass 1 — pockets
   ctx.beginPath()
@@ -263,11 +291,22 @@ async function loadFile(): Promise<void> {
 }
 
 function deleteSelected(): void {
+  const stock = store.project?.stock
+  if (!stock) return
+  const guide = store.selectedGuide
+  if (guide) {
+    historyStore.pushHistory(stock)
+    const idx = stock.guides.indexOf(guide)
+    if (idx !== -1) stock.guides.splice(idx, 1)
+    store.selectedGuide = null
+    scheduleRender()
+    return
+  }
   const item = store.selectedItem
-  if (!item || !store.project?.stock) return
-  historyStore.pushHistory(store.project.stock)
-  const idx = store.project.stock.items.indexOf(item)
-  if (idx !== -1) store.project.stock.items.splice(idx, 1)
+  if (!item) return
+  historyStore.pushHistory(stock)
+  const idx = stock.items.indexOf(item)
+  if (idx !== -1) stock.items.splice(idx, 1)
   store.selectedItem = null
   scheduleRender()
 }
@@ -275,6 +314,10 @@ function deleteSelected(): void {
 defineExpose({ loadFile, scheduleRender, deleteSelected })
 
 watch(() => store.activeTool, (_newTool, oldTool) => {
+  // When leaving the guide tool, clear the preview selection if it was never placed
+  if (oldTool === 'guide' && store.selectedGuide === guideTool.preview) {
+    store.selectedGuide = null
+  }
   toolHandlers[oldTool]?.onPointerLeave?.(toolCtx)
   if (mouseOnCanvas && lastMouseEvent) {
     activeTool().onPointerMove(lastMouseEvent, toolCtx)
@@ -354,7 +397,7 @@ function moveItem(dx: number, dy: number): void {
   scheduleRender()
 }
 
-const hasSel   = () => store.selectedItem !== null
+const hasSel   = () => store.selectedItem !== null || store.selectedGuide !== null
 const notSel   = () => store.activeTool !== 'select'
 const stepX    = () => store.snapToGrid && store.gridX > 0 ? store.gridX : 1.0
 const stepY    = () => store.snapToGrid && store.gridY > 0 ? store.gridY : 1.0
@@ -364,7 +407,8 @@ const setTool = (t: ToolType) => () => { store.activeTool = t; scheduleRender() 
 function applyHistoryStock(stock: PanelStock | null): void {
   if (!stock || !store.project) return
   store.project.stock = stock
-  store.selectedItem = null
+  store.selectedItem  = null
+  store.selectedGuide = null
   store.notifyItemChanged()
   scheduleRender()
 }
@@ -387,6 +431,7 @@ const keyBindings: KeyBinding[] = [
   { key: 'r', action: setTool('rectPocket')      },
   { key: 'c', action: setTool('circularPocket')  },
   { key: 'd', action: setTool('dial')            },
+  { key: 'g', action: setTool('guide')           },
   { key: 'Delete', guard: hasSel, action: () => emit('deleteRequested') },
   // Arrow nudge — ctrl: fine (0.01 mm), shift: coarse (1.0 mm), plain: normal (0.1 mm)
   { key: 'ArrowLeft',  ctrl: true,                guard: hasSel, action: () => moveItem(-0.01,  0)    },
