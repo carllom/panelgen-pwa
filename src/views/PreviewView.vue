@@ -8,7 +8,7 @@ import { parseGCodeMoves } from '../domain/GCodeParser'
 
 const store = useAppStore()
 const container = ref<HTMLDivElement | null>(null)
-const zScale = ref(20)
+const zScale = ref(1)
 const resolution = ref(2)
 const building = ref(false)
 const statusMsg = ref('')
@@ -30,6 +30,7 @@ let scene: THREE.Scene | null = null
 let camera: THREE.PerspectiveCamera | null = null
 let controls: OrbitControls | null = null
 let panelMesh: THREE.Mesh | null = null
+let wallMesh: THREE.Mesh | null = null
 let outlineGroup: THREE.Group | null = null
 let currentHm: DexelHeightmap | null = null
 let animId = 0
@@ -117,6 +118,7 @@ function dispose(): void {
   cancelAnimationFrame(animId)
   ro?.disconnect()
   removePanelMesh()
+  removeHoleGeometry()
   removeOutline()
   controls?.dispose()
   renderer?.dispose()
@@ -131,6 +133,15 @@ function removePanelMesh(): void {
   panelMesh.geometry.dispose()
   ;(panelMesh.material as THREE.Material).dispose()
   panelMesh = null
+}
+
+function removeHoleGeometry(): void {
+  if (wallMesh && scene) {
+    scene.remove(wallMesh)
+    wallMesh.geometry.dispose()
+    ;(wallMesh.material as THREE.Material).dispose()
+  }
+  wallMesh = null
 }
 
 function removeOutline(): void {
@@ -157,12 +168,15 @@ async function rebuild(): Promise<void> {
   await new Promise<void>(r => setTimeout(r, 0))       // yield to browser so it can repaint
 
   removePanelMesh()
+  removeHoleGeometry()
   removeOutline()
 
   currentHm = computeHeightmap()
   if (currentHm) {
+    const thickness = store.project.stock.thickness
     panelMesh = buildMeshFromHm(currentHm)
     scene.add(panelMesh)
+    buildHoleGeometry(currentHm, thickness, zScale.value)
     addOutline(currentHm.panelW, currentHm.panelH)
   }
 
@@ -262,13 +276,90 @@ function addOutline(panelW: number, panelH: number): void {
   scene.add(outlineGroup)
 }
 
+// ── Through-hole walls + back panel ──────────────────────────────────────────
+
+function buildHoleGeometry(hm: DexelHeightmap, thickness: number, scale: number): void {
+  if (!scene) return
+
+  // Wall quads only — no back cap, so holes are open all the way through.
+  // Built at scale=1 (z in mm); wallMesh.scale.z drives the visual depth.
+  const wm = buildWallMesh(hm, thickness)
+  if (wm) {
+    wm.scale.z = scale
+    wallMesh = wm
+    scene.add(wm)
+  }
+}
+
+/**
+ * For every through-hole pixel that borders a solid pixel, emit a vertical quad
+ * running from the solid neighbour's surface depth down to -thickness.
+ * Built at z scale=1 so the caller can animate depth via mesh.scale.z.
+ */
+function buildWallMesh(hm: DexelHeightmap, thickness: number): THREE.Mesh | null {
+  const { gridW, gridH, panelW, panelH, data, pxPerMm } = hm
+  const mmPerPx = 1 / pxPerMm
+  const hw = mmPerPx * 0.5
+  const zBack = -thickness
+
+  const verts: number[] = []
+  const idxs: number[] = []
+
+  function quad(x0: number, y0: number, x1: number, y1: number, zTop: number): void {
+    const b = verts.length / 3
+    verts.push(x0, y0, zTop,  x1, y1, zTop,  x1, y1, zBack,  x0, y0, zBack)
+    idxs.push(b, b+1, b+2,  b, b+2, b+3)
+  }
+
+  for (let row = 0; row < gridH; row++) {
+    for (let col = 0; col < gridW; col++) {
+      if (data[row * gridW + col] > -thickness) continue   // not a through-hole pixel
+
+      const cx = col * mmPerPx - panelW / 2
+      const cy = panelH / 2 - row * mmPerPx
+
+      // For each of the 4 neighbours: if it's solid, emit a wall quad on the shared edge
+      if (col + 1 < gridW && data[row * gridW + col + 1] > -thickness) {
+        const xe = cx + hw
+        quad(xe, cy - hw, xe, cy + hw, data[row * gridW + col + 1])
+      }
+      if (col > 0 && data[row * gridW + col - 1] > -thickness) {
+        const xe = cx - hw
+        quad(xe, cy + hw, xe, cy - hw, data[row * gridW + col - 1])
+      }
+      if (row > 0 && data[(row - 1) * gridW + col] > -thickness) {
+        const ye = cy + hw
+        quad(cx - hw, ye, cx + hw, ye, data[(row - 1) * gridW + col])
+      }
+      if (row + 1 < gridH && data[(row + 1) * gridW + col] > -thickness) {
+        const ye = cy - hw
+        quad(cx + hw, ye, cx - hw, ye, data[(row + 1) * gridW + col])
+      }
+    }
+  }
+
+  if (verts.length === 0) return null
+
+  const geo = new THREE.BufferGeometry()
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3))
+  geo.setIndex(idxs)
+  geo.computeVertexNormals()
+
+  return new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
+    color: 0xb0bfcc, roughness: 0.38, metalness: 0.68, side: THREE.DoubleSide,
+  }))
+}
+
 // ── Z-scale live update (no full rebuild needed) ───────────────────────────────
 
 function updateZScale(): void {
   if (!panelMesh || !currentHm) return
-  const pos = panelMesh.geometry.attributes.position as THREE.BufferAttribute
   const thickness = store.project?.stock.thickness ?? 999
-  applyHeightmapToGeometry(pos, panelMesh.geometry, currentHm.data, zScale.value, thickness)
+  applyHeightmapToGeometry(
+    panelMesh.geometry.attributes.position as THREE.BufferAttribute,
+    panelMesh.geometry, currentHm.data, zScale.value, thickness,
+  )
+  if (wallMesh) wallMesh.scale.z = zScale.value
 }
 </script>
 
