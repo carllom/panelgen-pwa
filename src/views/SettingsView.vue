@@ -83,6 +83,25 @@ const store = useAppStore()
     </section>
 
     <section class="settings-section">
+      <h3 class="section-title">3D Preview</h3>
+
+      <div class="setting-row">
+        <span class="setting-label has-tooltip" data-tooltip="Surface material appearance of the panel in 3D preview">Material</span>
+        <select v-model="store.previewMaterial" class="preview-select">
+          <option value="brushed-metal">Brushed metal</option>
+          <option value="anodized">Anodized aluminum</option>
+          <option value="matte">Matte (non-glossy)</option>
+          <option value="polished">Polished metal</option>
+        </select>
+      </div>
+
+      <div class="setting-row">
+        <span class="setting-label has-tooltip" data-tooltip="Base stock color in the 3D preview">Stock color</span>
+        <input type="color" v-model="store.previewColor" />
+      </div>
+    </section>
+
+    <section class="settings-section">
       <h3 class="section-title">Colors</h3>
 
       <div class="setting-row">
@@ -256,5 +275,15 @@ input[type="color"] {
   color: #8899bb;
   min-width: 32px;
   text-align: right;
+}
+
+.preview-select {
+  background: #0d1b35;
+  border: 1px solid #1e3a5a;
+  color: #e0e0e0;
+  border-radius: 3px;
+  padding: 3px 6px;
+  font-size: 12px;
+  font-family: inherit;
 }
 </style>

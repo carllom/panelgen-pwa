@@ -7,6 +7,8 @@ import { hexToRgba } from '../utils/color'
 
 export type ToolType = 'select' | 'nodeEdit' | 'dial' | 'text' | 'polyline' | 'circularPocket' | 'rectPocket'
 
+export type PreviewMaterial = 'brushed-metal' | 'anodized' | 'matte' | 'polished'
+
 export const useAppStore = defineStore('app', () => {
   // Active project
   const project = shallowRef<PanelGenProject | null>(null)
@@ -48,6 +50,10 @@ export const useAppStore = defineStore('app', () => {
   const colorPreviewAlpha    = ref(0.55)
   const colorPreviewBoxAlpha = ref(0.25)
 
+  // 3D preview appearance (persisted)
+  const previewMaterial = ref<PreviewMaterial>('brushed-metal')
+  const previewColor    = ref('#b0bfcc')
+
   const colorPreviewRgba    = computed(() => hexToRgba(colorPreview.value, colorPreviewAlpha.value))
   const colorPreviewBoxRgba = computed(() => hexToRgba(colorPreview.value, colorPreviewBoxAlpha.value))
 
@@ -72,6 +78,7 @@ export const useAppStore = defineStore('app', () => {
     colorPocket, colorEngrave, colorBorder,
     colorPreview, colorPreviewAlpha, colorPreviewBoxAlpha,
     colorPreviewRgba, colorPreviewBoxRgba,
+    previewMaterial, previewColor,
     showOriginAxes,
     viewportInitialized, zoom, panX, panY,
   }
@@ -84,6 +91,7 @@ export const useAppStore = defineStore('app', () => {
       'defaultPanelWidth', 'defaultPanelHeight', 'defaultPanelThickness',
       'colorPocket', 'colorEngrave', 'colorBorder',
       'colorPreview', 'colorPreviewAlpha', 'colorPreviewBoxAlpha',
+      'previewMaterial', 'previewColor',
       'showOriginAxes',
     ],
   },

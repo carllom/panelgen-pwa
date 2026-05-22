@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
+import type { PreviewMaterial } from '../stores/appStore'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { useAppStore } from '../stores/appStore'
@@ -41,7 +42,28 @@ onMounted(() => {
   rebuild()
 })
 
+watch([() => store.previewMaterial, () => store.previewColor], () => rebuild())
+
 onBeforeUnmount(dispose)
+
+// ── Material presets ──────────────────────────────────────────────────────────
+
+const MATERIAL_PARAMS: Record<PreviewMaterial, { roughness: number; metalness: number }> = {
+  'brushed-metal': { roughness: 0.38, metalness: 0.68 },
+  'anodized':      { roughness: 0.55, metalness: 0.80 },
+  'matte':         { roughness: 0.90, metalness: 0.00 },
+  'polished':      { roughness: 0.08, metalness: 0.92 },
+}
+
+function panelMaterial(): THREE.MeshStandardMaterial {
+  const { roughness, metalness } = MATERIAL_PARAMS[store.previewMaterial]
+  return new THREE.MeshStandardMaterial({
+    color: store.previewColor,
+    roughness,
+    metalness,
+    side: THREE.DoubleSide,
+  })
+}
 
 // ── Three.js setup ────────────────────────────────────────────────────────────
 
@@ -205,7 +227,7 @@ function computeHeightmap(): DexelHeightmap | null {
     for (const move of moves) {
       if (!move.isLinear || move.z >= 0) continue
       if (toolType === 'vbit') {
-        hm.applyVBit(move.fromX, move.fromY, move.x, move.y, move.z, tool.vbitAngle ?? 90)
+        hm.applyVBit(move.fromX, move.fromY, move.x, move.y, move.z, tool.vbitAngle ?? 90, tool.diameter ?? 0)
       } else {
         hm.applyEndMill(move.fromX, move.fromY, move.x, move.y, move.z, tool.diameter / 2)
       }
@@ -223,14 +245,7 @@ function buildMeshFromHm(hm: DexelHeightmap): THREE.Mesh {
 
   applyHeightmapToGeometry(pos, geo, data, zScale.value, thickness)
 
-  const mat = new THREE.MeshStandardMaterial({
-    color: 0xb0bfcc,
-    roughness: 0.38,
-    metalness: 0.68,
-    side: THREE.DoubleSide,
-  })
-
-  return new THREE.Mesh(geo, mat)
+  return new THREE.Mesh(geo, panelMaterial())
 }
 
 /**
@@ -345,9 +360,7 @@ function buildWallMesh(hm: DexelHeightmap, thickness: number): THREE.Mesh | null
   geo.setIndex(idxs)
   geo.computeVertexNormals()
 
-  return new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
-    color: 0xb0bfcc, roughness: 0.38, metalness: 0.68, side: THREE.DoubleSide,
-  }))
+  return new THREE.Mesh(geo, panelMaterial())
 }
 
 // ── Z-scale live update (no full rebuild needed) ───────────────────────────────
